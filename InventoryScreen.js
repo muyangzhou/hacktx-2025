@@ -4,12 +4,9 @@ import { usePets } from './App';
 import items from './items.json'; // if your bundler complains, see note below
 
 export default function InventoryScreen({ navigate }) {
+  // ... (all helper functions remain the same) ...
   const { selectedPet, updatePet } = usePets();
-
-  // Ensure we always have an inventory array
   const inventory = selectedPet?.inventory ?? [];
-
-  // Group the catalog by slot/type for convenience
   const groupedCatalog = useMemo(() => {
     const groups = {};
     for (const it of items) {
@@ -19,8 +16,6 @@ export default function InventoryScreen({ navigate }) {
     }
     return groups;
   }, []);
-
-  // Helpers
   const addToInventory = (catalogItem) => {
     updatePet(selectedPet.id, (p) => {
       const inv = Array.isArray(p.inventory) ? p.inventory.slice() : [];
@@ -30,7 +25,6 @@ export default function InventoryScreen({ navigate }) {
       return { inventory: inv };
     });
   };
-
   const removeFromInventory = (itemId) => {
     updatePet(selectedPet.id, (p) => {
       const inv = (p.inventory || []).filter(i => i.id !== itemId);
@@ -40,18 +34,15 @@ export default function InventoryScreen({ navigate }) {
       return { inventory: inv, ...(Object.keys(unequip).length ? unequip : {}) };
     });
   };
-
   const equipItem = (item) => {
-    const slot = item.slot || item.type; // "weapon" or "cosmetic"
+    const slot = item.slot || item.type;
     if (!slot) return;
-
     updatePet(selectedPet.id, (p) => {
       const equipped = { ...(p.equipped || {}) };
       equipped[slot] = item.id;
       return { equipped };
     });
   };
-
   const unequipSlot = (slot) => {
     updatePet(selectedPet.id, (p) => {
       const equipped = { ...(p.equipped || {}) };
@@ -59,13 +50,10 @@ export default function InventoryScreen({ navigate }) {
       return { equipped };
     });
   };
-
   const isEquipped = (item) => {
     const slot = item.slot || item.type;
     return Boolean(selectedPet?.equipped && selectedPet.equipped[slot] === item.id);
   };
-
-  // --- Helper to render a single item row ---
   const renderItemRow = (it, type) => {
     return (
       <div key={it.id} style={styles.row}>
@@ -95,7 +83,6 @@ export default function InventoryScreen({ navigate }) {
     );
   };
 
-
   if (!selectedPet) {
     return (
       <div style={styles.container}>
@@ -107,36 +94,21 @@ export default function InventoryScreen({ navigate }) {
 
   return (
     <div style={styles.wrapper}>
-      {/* Header / Selected Pet */}
+      {/* ... (Header and Equipped sections remain same) ... */}
       <div style={styles.header}>
         <div>
           <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
           <div style={{ opacity: 0.7 }}>
-            {/* --- Typo Corrected Below --- */}
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
           </div>
         </div>
         <button style={styles.button} onClick={() => navigate('Home')}>Back</button>
       </div>
-
-      {/* Equipped section */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Equipped</h3>
         <div style={styles.equippedRow}>
-          <EquippedSlot
-            label="Weapon"
-            slot="weapon"
-            selectedPet={selectedPet}
-            inventory={inventory}
-            onUnequip={() => unequipSlot('weapon')}
-          />
-          <EquippedSlot
-            label="Cosmetic"
-            slot="cosmetic"
-            selectedPet={selectedPet}
-            inventory={inventory}
-            onUnequip={() => unequipSlot('cosmetic')}
-          />
+          <EquippedSlot label="Weapon" slot="weapon" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('weapon')} />
+          <EquippedSlot label="Cosmetic" slot="cosmetic" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('cosmetic')} />
         </div>
       </div>
 
@@ -174,9 +146,6 @@ export default function InventoryScreen({ navigate }) {
           )}
         </div>
       </div>
-
-      {/* --- Debug Section Removed --- */}
-
     </div>
   );
 }
@@ -185,7 +154,6 @@ export default function InventoryScreen({ navigate }) {
 function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
   const equippedId = selectedPet?.equipped?.[slot] ?? null;
   const item = inventory.find(i => i.id === equippedId) || null;
-
   return (
     <div style={styles.equippedSlot}>
       <div style={styles.equippedLabel}>{label}</div>
@@ -207,6 +175,7 @@ function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
 
 
 const styles = {
+  // ... (other styles remain same) ...
   wrapper: {
     padding: 20,
     fontFamily: 'Arial, sans-serif',
@@ -275,12 +244,12 @@ const styles = {
   itemName: { fontWeight: 'bold' },
   itemMeta: { opacity: 0.7, fontSize: 13 },
   groupTitle: { fontWeight: 'bold', margin: '8px 0' },
+  // --- Updated Style ---
   scrollBox: {
-    maxHeight: '200px',
+    maxHeight: '100px', // Changed from 200px
     overflowY: 'auto',
     border: '1px solid #f0f0f0',
     borderRadius: 5,
     padding: '0 4px',
   },
-  // --- Debug Styles Removed ---
 };
