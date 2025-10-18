@@ -1,6 +1,8 @@
 // BattleScreen.js
 import React, { useState } from 'react';
 import { usePets } from './App';
+import { petImages } from './assets/petImages'
+import { Image } from 'react-native'
 
 export default function BattleScreen({ navigate }) {
   // Get addXp and updateGlobalGold
@@ -41,6 +43,11 @@ export default function BattleScreen({ navigate }) {
     <div style={{ padding: 20 }}>
       <h3>Battle</h3>
       <p>{selectedPet.name} HP: {selectedPet.hp}/{selectedPet.maxHp} (Lvl {selectedPet.level})</p>
+      <Image
+        source={petImages[selectedPet.id]}
+        style={{ width: 64, height: 64 }}
+        accessibilityLabel={selectedPet.name}
+      />
       <p>Enemy HP: {enemyHp}/30</p>
 
       <button onClick={playerAttack}>Attack</button>
