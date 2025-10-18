@@ -3,6 +3,7 @@
   "license": "0BSD",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -11,6 +12,8 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
+    "@google/genai": "^1.25.0",
+    "dotenv": "^17.2.3",
     "expo": "~54.0.13",
     "expo-status-bar": "~3.0.8",
     "react": "19.1.0",
