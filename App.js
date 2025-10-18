@@ -5,8 +5,7 @@ import BattleScreen from './BattleScreen';
 import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
-// If using Expo/Native, prefer AsyncStorage; for web-only, localStorage is fine.
-// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import RosterScreen from './RosterScreen'; // No longer used
 
 export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
@@ -15,15 +14,14 @@ export default function App() {
   // Global player currency
   const [globalGold, setGlobalGold] = useState(150);
   
-  // Simple demo seed (removed 'gold' from pets)
+  // Updated pet seed with XP properties
   const [pets, setPets] = useState([
-    { id: 'p1', name: 'Aegis', level: 3, hp: 35, maxHp: 35, attack: 7, inventory: [], equipped: {weapon: null, comsetic:null}},
-    { id: 'p2', name: 'Nyx',   level: 1, hp: 20, maxHp: 20, attack: 5, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p1', name: 'Aegis', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p2', name: 'Nyx',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
 
-  // --- optional: persist roster & gold ---
-  // ... (persistence logic would need to save globalGold too)
+  // ... (persistence logic) ...
 
   const selectedPet = useMemo(
     () => pets.find(p => p.id === selectedPetId) ?? null,
@@ -39,42 +37,99 @@ export default function App() {
     setPets(prev => [...prev, pet]);
   };
 
-  // Helper for global currency
   const updateGlobalGold = (updater) => {
-    setGlobalGold(updater); // updater can be a value or a function like (prev => prev + 10)
+    setGlobalGold(updater);
   };
+
+  // --- New Level-Up and XP Handler ---
+  const addXp = (id, amount) => {
+    let petToUpdate = pets.find(p => p.id === id);
+    if (!petToUpdate) return;
+
+    let newXp = petToUpdate.xp + amount;
+    let newLevel = petToUpdate.level;
+    let newMaxHp = petToUpdate.maxHp;
+    let newAttack = petToUpdate.attack;
+    let newXpToNextLevel = petToUpdate.xpToNextLevel;
+
+    let leveledUp = false;
+
+    // Check for level up
+    if (newXp >= newXpToNextLevel) {
+      leveledUp = true;
+      newLevel += 1;
+      newXp -= newXpToNextLevel; // Rollover XP
+      newXpToNextLevel = Math.floor(newXpToNextLevel * 1.5); // Increase XP requirement
+      
+      // Stat increases
+      newMaxHp = Math.floor(newMaxHp * 1.2); // +20% max HP
+      newAttack = newAttack + 2; // +2 attack
+      
+      // Grant monetary award for leveling up
+      const levelUpGold = 50 * newLevel;
+      updateGlobalGold(prev => prev + levelUpGold);
+      
+      alert(`${petToUpdate.name} grew to Level ${newLevel}!\nMax HP +${newMaxHp - petToUpdate.maxHp}, Attack +2.\nYou found ${levelUpGold} gold!`);
+    }
+
+    // Apply all updates
+    updatePet(id, (p) => ({
+      ...p,
+      xp: newXp,
+      level: newLevel,
+      maxHp: newMaxHp,
+      hp: leveledUp ? newMaxHp : p.hp, // Heal on level up
+      attack: newAttack,
+      xpToNextLevel: newXpToNextLevel
+    }));
+  };
+
+  // --- "New Day" logic moved from HomeScreen ---
+  const handleNewDay = () => {
+    if (!selectedPetId) {
+      alert("Please select a pet first.");
+      return;
+    }
+    const randomAmount = Math.floor(Math.random() * 201) + 50;
+    updateGlobalGold(prev => prev + randomAmount);
+    const hpLoss = Math.floor(Math.random() * 5) + 1;
+    updatePet(selectedPetId, (p) => ({
+      hp: Math.max(0, p.hp - hpLoss)
+    }));
+    alert(`New Day: Found ${randomAmount} gold and lost ${hpLoss} HP!`);
+  };
+
 
   const value = useMemo(() => ({
     pets,
     selectedPet,
     selectedPetId,
     setSelectedPetId,
-    updatePet,   // (id, updaterFn) -> merges updaterFn(p) into pet
-    addPet,      // add a new pet
-    setPets,     // in case you want full control later
+    updatePet,
+    addPet,
+    setPets,
     globalGold,
     updateGlobalGold,
+    addXp,
   }), [pets, selectedPet, selectedPetId, globalGold]);
 
-  // ---- your existing mini-router ----
+  // ---- router ----
   const [screen, setScreen] = useState('Home');
   const [params, setParams] = useState(null);
   const navigate = (nextScreen, nextParams = null) => {
     setScreen(nextScreen);
     setParams(nextParams);
-    setMenuOpen(false); // Close menu on navigation
+    setMenuOpen(false);
   };
 
-  // --- New Menu State ---
+  // --- Menu State ---
   const [menuOpen, setMenuOpen] = useState(false);
 
   const renderMenu = () => {
     if (!menuOpen) return null;
 
     return (
-      // Overlay
       <div style={styles.menuOverlay} onClick={() => setMenuOpen(false)}>
-        {/* Popup Body */}
         <div style={styles.menuPopup} onClick={(e) => e.stopPropagation()}>
           <button 
             style={styles.menuItem} 
@@ -94,8 +149,11 @@ export default function App() {
   return (
     <PetContext.Provider value={value}>
       <div style={styles.appContainer}>
-        {/* --- New Global Header --- */}
+        {/* --- Global Header --- */}
         <div style={styles.headerBar}>
+          <div style={styles.goldDisplay}>
+            Gold: {globalGold}
+          </div>
           <button onClick={() => setMenuOpen(true)}>
             ☰ Menu
           </button>
@@ -105,40 +163,54 @@ export default function App() {
         <div style={styles.screenContainer}>
           {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
           {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
-          {screen === 'Shop'   && <ShopScreen   navigate={navigate} />}
+          {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
-          {screen === 'Roster' && <RosterScreen navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
         </div>
 
         {/* --- Render Popup (if open) --- */}
         {renderMenu()}
+
+        {/* --- New Day Button (Global) --- */}
+        <button style={styles.newDayButton} onClick={handleNewDay}>
+          New Day
+        </button>
       </div>
     </PetContext.Provider>
   );
 }
 
-// Styles
+// ... (styles for App layout)
 const styles = {
   appContainer: {
     fontFamily: 'Arial, sans-serif',
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    position: 'relative', // Added for fixed button positioning
   },
   headerBar: {
     padding: '10px 20px',
     backgroundColor: '#f5f5f5',
     borderBottom: '1px solid #ddd',
-    textAlign: 'right', // Puts menu button on the right
-    flexShrink: 0, // Prevents header from shrinking
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexShrink: 0,
+    zIndex: 10, // Ensure header is above screen content
+  },
+  goldDisplay: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   screenContainer: {
-    flex: 1, // Takes up remaining vertical space
-    overflowY: 'auto', // Allows individual screens to scroll
-    position: 'relative', // Needed for some layout contexts
+    flex: 1,
+    overflowY: 'auto',
+    position: 'relative',
+    paddingBottom: 60, // Add padding so floating button doesn't cover content
   },
   menuOverlay: {
+    // ... (styles remain same)
     position: 'fixed',
     top: 0,
     left: 0,
@@ -151,6 +223,7 @@ const styles = {
     zIndex: 1000,
   },
   menuPopup: {
+    // ... (styles remain same)
     backgroundColor: 'white',
     padding: '10px',
     borderRadius: '10px',
@@ -160,6 +233,7 @@ const styles = {
     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   },
   menuItem: {
+    // ... (styles remain same)
     padding: '12px 20px',
     fontSize: '16px',
     border: 'none',
@@ -167,49 +241,18 @@ const styles = {
     cursor: 'pointer',
     textAlign: 'left',
     borderBottom: '1px solid #eee',
+  },
+  newDayButton: {
+    position: 'fixed', // Fixed position
+    bottom: 10, // 10px from the bottom
+    right: 10, // 10px from the right
+    padding: '10px 15px',
+    backgroundColor: '#f0f0f0',
+    border: '1px solid #ccc',
+    borderRadius: 8,
+    cursor: 'pointer',
+    fontSize: 14,
+    zIndex: 999, // Above screen, below menu
+    boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
   }
 };
-
-
-// Inline here for brevity; feel free to split into its own file.
-function RosterScreen({ navigate }) {
-  const { pets, selectedPetId, setSelectedPetId, addPet } = usePets();
-
-  const handleSelect = (id) => {
-    setSelectedPetId(id);
-    navigate('Home');
-  };
-
-  const handleAdd = () => {
-    const id = `p${Math.random().toString(36).slice(2, 7)}`;
-    // Note: 'gold' property is removed
-    addPet({ id, name: 'New Pet', level: 1, hp: 20, maxHp: 20, attack: 5 });
-  };
-
-  return (
-    <div style={{ padding: 20, maxWidth: 600, margin: '0 auto' }}>
-      <h2>Pet Roster</h2>
-      {pets.map(p => (
-        <div key={p.id} style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: 12, border: '1px solid #eee', borderRadius: 8, marginBottom: 10
-        }}>
-          <div>
-            <div><strong>{p.name}</strong> {p.id === selectedPetId ? ' (Selected)' : ''}</div>
-            {/* Removed Gold display from here */}
-            <div>Lvl {p.level} • HP {p.hp}/{p.maxHp} • ATK {p.attack}</div>
-          </div>
-          <div>
-            <button onClick={() => handleSelect(p.id)} style={{ marginRight: 8 }}>
-              {p.id === selectedPetId ? 'Use' : 'Select'}
-            </button>
-          </div>
-        </div>
-      ))}
-      <button onClick={handleAdd} style={{ marginTop: 10 }}>+ Add New Pet</button>
-      <div style={{ marginTop: 20 }}>
-        <button onClick={() => navigate('Home')}>Back</button>
-      </div>
-    </div>
-  );
-}
