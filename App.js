@@ -12,40 +12,36 @@ export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
-  // Simple demo seed
+  // Global player currency
+  const [globalGold, setGlobalGold] = useState(150);
+  
+  // Simple demo seed (removed 'gold' from pets)
   const [pets, setPets] = useState([
-    { id: 'p1', name: 'Aegis', level: 3, hp: 35, maxHp: 35, attack: 7, gold: 120 , inventory: [], equipped: {weapon: null, comsetic:null}},
-    { id: 'p2', name: 'Nyx',   level: 1, hp: 20, maxHp: 20, attack: 5, gold: 60  , inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p1', name: 'Aegis', level: 3, hp: 35, maxHp: 35, attack: 7, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p2', name: 'Nyx',   level: 1, hp: 20, maxHp: 20, attack: 5, inventory: [], equipped: {weapon: null, comsetic:null}},
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
 
-  // --- optional: persist roster ---
-  // useEffect(() => {
-  //   (async () => {
-  //     const raw = await AsyncStorage.getItem('ROSTER');
-  //     if (raw) {
-  //       const { pets, selectedPetId } = JSON.parse(raw);
-  //       if (pets?.length) setPets(pets);
-  //       if (selectedPetId) setSelectedPetId(selectedPetId);
-  //     }
-  //   })();
-  // }, []);
-  // useEffect(() => {
-  //   AsyncStorage.setItem('ROSTER', JSON.stringify({ pets, selectedPetId }));
-  // }, [pets, selectedPetId]);
+  // --- optional: persist roster & gold ---
+  // ... (persistence logic would need to save globalGold too)
 
   const selectedPet = useMemo(
     () => pets.find(p => p.id === selectedPetId) ?? null,
     [pets, selectedPetId]
   );
 
-  // helpers to keep updates immutable & scoped by id
+  // helpers
   const updatePet = (id, updater) => {
     setPets(prev => prev.map(p => (p.id === id ? { ...p, ...updater(p) } : p)));
   };
 
   const addPet = (pet) => {
     setPets(prev => [...prev, pet]);
+  };
+
+  // Helper for global currency
+  const updateGlobalGold = (updater) => {
+    setGlobalGold(updater); // updater can be a value or a function like (prev => prev + 10)
   };
 
   const value = useMemo(() => ({
@@ -55,8 +51,10 @@ export default function App() {
     setSelectedPetId,
     updatePet,   // (id, updaterFn) -> merges updaterFn(p) into pet
     addPet,      // add a new pet
-    setPets      // in case you want full control later
-  }), [pets, selectedPet, selectedPetId]);
+    setPets,     // in case you want full control later
+    globalGold,
+    updateGlobalGold,
+  }), [pets, selectedPet, selectedPetId, globalGold]);
 
   // ---- your existing mini-router ----
   const [screen, setScreen] = useState('Home');
@@ -89,7 +87,8 @@ function RosterScreen({ navigate }) {
 
   const handleAdd = () => {
     const id = `p${Math.random().toString(36).slice(2, 7)}`;
-    addPet({ id, name: 'New Pet', level: 1, hp: 20, maxHp: 20, attack: 5, gold: 0 });
+    // Note: 'gold' property is removed
+    addPet({ id, name: 'New Pet', level: 1, hp: 20, maxHp: 20, attack: 5 });
   };
 
   return (
@@ -102,7 +101,8 @@ function RosterScreen({ navigate }) {
         }}>
           <div>
             <div><strong>{p.name}</strong> {p.id === selectedPetId ? ' (Selected)' : ''}</div>
-            <div>Lvl {p.level} • HP {p.hp}/{p.maxHp} • ATK {p.attack} • Gold {p.gold}</div>
+            {/* Removed Gold display from here */}
+            <div>Lvl {p.level} • HP {p.hp}/{p.maxHp} • ATK {p.attack}</div>
           </div>
           <div>
             <button onClick={() => handleSelect(p.id)} style={{ marginRight: 8 }}>

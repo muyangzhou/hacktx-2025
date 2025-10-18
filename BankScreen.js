@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { usePets } from './App'; // Import the context
 
 const BankScreen = ({ navigate }) => {
   const [accountLinked, setAccountLinked] = useState(false);
   const [savings, setSavings] = useState('');
-  const [currency, setCurrency] = useState(0);
+  
+  // Get global currency state and updater from context
+  const { globalGold, updateGlobalGold } = usePets();
 
   const handleLinkAccount = () => {
     // This would involve a secure third-party service like Plaid in a real app
@@ -16,10 +19,12 @@ const BankScreen = ({ navigate }) => {
     if (!isNaN(savedAmount) && savedAmount > 0) {
       // Reward logic: 1 currency for every $10 saved
       const newCurrency = Math.floor(savedAmount / 10);
-      setCurrency(currency + newCurrency);
+      
+      // Update the global currency state
+      updateGlobalGold(prevGold => prevGold + newCurrency);
+      
       alert(`Savings Added! You earned ${newCurrency} in-game currency!`);
       setSavings('');
-      // In a real app, you would update the user's currency total globally
     } else {
       alert('Invalid Amount: Please enter a valid number.');
     }
@@ -80,13 +85,14 @@ const BankScreen = ({ navigate }) => {
       ) : (
         <div style={styles.form}>
           <p style={styles.linkedText}>Account Linked!</p>
-          <p>Total In-Game Currency: ${currency}</p>
+          {/* Display globalGold from context */}
+          <p>Total In-Game Currency: ${globalGold}</p>
           <input
             style={styles.input}
             placeholder="Enter amount you saved"
             type="number"
             value={savings}
-            onChange={(e) => setSavings(e.target.value)}
+            onChange={(e) => setSavings(e.targe.value)}
           />
           <button style={styles.button} onClick={handleAddSavings}>Add Savings & Get Reward</button>
         </div>
@@ -97,4 +103,3 @@ const BankScreen = ({ navigate }) => {
 };
 
 export default BankScreen;
-

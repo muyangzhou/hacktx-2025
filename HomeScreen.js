@@ -3,7 +3,8 @@ import React from 'react';
 import { usePets } from './App'; // or from a separate PetContext file
 
 export default function HomeScreen({ navigate }) {
-  const { selectedPet } = usePets();
+  // Get globalGold from context
+  const { selectedPet, globalGold } = usePets();
 
   if (!selectedPet) {
     return (
@@ -14,7 +15,7 @@ export default function HomeScreen({ navigate }) {
     );
   }
 
-  const { name, level, hp, maxHp, attack, gold } = selectedPet;
+  const { name, level, hp, maxHp, attack } = selectedPet;
 
   return (
     <div style={{ padding: 20 }}>
@@ -22,7 +23,8 @@ export default function HomeScreen({ navigate }) {
       <p>Level: {level}</p>
       <p>HP: {hp}/{maxHp}</p>
       <p>Attack: {attack}</p>
-      <p>Gold: {gold}</p>
+      {/* Display globalGold */}
+      <p>Player Gold: {globalGold}</p>
 
       <button onClick={() => navigate('Battle')}>Battle</button>
       <button onClick={() => navigate('Shop')}>Shop</button>
