@@ -1,0 +1,9 @@
+[
+  { "id": "w-basic-sword", "name": "Basic Sword", "slot": "weapon", "power": 3, "price": 50 },
+  { "id": "w-power-sword", "name": "Power Sword", "slot": "weapon", "power": 7, "price": 120 },
+  { "id": "w-mega-shield", "name": "Mega Shield", "slot": "weapon", "power": 0, "price": 80 },
+
+  { "id": "c-default-cap", "name": "Default Cap", "slot": "cosmetic", "price": 15 },
+  { "id": "c-cool-hat", "name": "Cool Hat", "slot": "cosmetic", "price": 50 },
+  { "id": "c-sunglasses", "name": "Sunglasses", "slot": "cosmetic", "price": 30 }
+]
