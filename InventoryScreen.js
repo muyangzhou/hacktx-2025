@@ -24,7 +24,6 @@ export default function InventoryScreen({ navigate }) {
   const addToInventory = (catalogItem) => {
     updatePet(selectedPet.id, (p) => {
       const inv = Array.isArray(p.inventory) ? p.inventory.slice() : [];
-      // Avoid dupes by id (optional – remove if you *want* duplicates)
       if (!inv.find(i => i.id === catalogItem.id)) {
         inv.push({ ...catalogItem, ownedAt: Date.now() });
       }
@@ -35,7 +34,6 @@ export default function InventoryScreen({ navigate }) {
   const removeFromInventory = (itemId) => {
     updatePet(selectedPet.id, (p) => {
       const inv = (p.inventory || []).filter(i => i.id !== itemId);
-      // If the removed item was equipped, unequip it too
       const unequip = {};
       if (p.equipped?.weapon === itemId) unequip.equipped = { ...p.equipped, weapon: null };
       if (p.equipped?.cosmetic === itemId) unequip.equipped = { ...(unequip.equipped || p.equipped), cosmetic: null };
@@ -50,7 +48,6 @@ export default function InventoryScreen({ navigate }) {
     updatePet(selectedPet.id, (p) => {
       const equipped = { ...(p.equipped || {}) };
       equipped[slot] = item.id;
-      // You can apply stat effects here if desired (see commented example below)
       return { equipped };
     });
   };
@@ -68,11 +65,42 @@ export default function InventoryScreen({ navigate }) {
     return Boolean(selectedPet?.equipped && selectedPet.equipped[slot] === item.id);
   };
 
+  // --- Helper to render a single item row ---
+  const renderItemRow = (it, type) => {
+    return (
+      <div key={it.id} style={styles.row}>
+        <div style={styles.rowMain}>
+          <div style={styles.itemName}>{it.name}</div>
+          <div style={styles.itemMeta}>
+            Slot: {it.slot || it.type || '—'}
+            {it.power ? ` • +${it.power} ATK` : ''}
+            {type === 'catalog' && typeof it.price === 'number' ? ` • $${it.price}` : ''}
+          </div>
+        </div>
+        <div style={styles.rowActions}>
+          {type === 'inventory' ? (
+            <>
+              {isEquipped(it) ? (
+                <button style={styles.smallButton} onClick={() => unequipSlot(it.slot || it.type)}>Unequip</button>
+              ) : (
+                <button style={styles.smallButton} onClick={() => equipItem(it)}>Equip</button>
+              )}
+              <button style={{ ...styles.smallButton, marginLeft: 8 }} onClick={() => removeFromInventory(it.id)}>Remove</button>
+            </>
+          ) : (
+            <button style={styles.smallButton} onClick={() => addToInventory(it)}>Add</button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+
   if (!selectedPet) {
     return (
       <div style={styles.container}>
         <h2>No pet selected</h2>
-        <button style={styles.button} onClick={() => navigate('Roster')}>Go to Roster</button>
+        <button style={styles.button} onClick={() => navigate('Home')}>Go to Home</button>
       </div>
     );
   }
@@ -84,6 +112,7 @@ export default function InventoryScreen({ navigate }) {
         <div>
           <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
           <div style={{ opacity: 0.7 }}>
+            {/* --- Typo Corrected Below --- */}
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
           </div>
         </div>
@@ -111,64 +140,48 @@ export default function InventoryScreen({ navigate }) {
         </div>
       </div>
 
-      {/* Inventory list */}
+      {/* --- Inventory list (Scrollable) --- */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Inventory</h3>
-        {inventory.length === 0 ? (
-          <div style={{ opacity: 0.7 }}>No items yet.</div>
-        ) : (
-          <div>
-            {inventory.map((it) => (
-              <div key={it.id} style={styles.row}>
-                <div style={styles.rowMain}>
-                  <div style={styles.itemName}>{it.name}</div>
-                  <div style={styles.itemMeta}>
-                    Slot: {it.slot || it.type || '—'}{it.power ? ` • +${it.power} ATK` : ''}
-                  </div>
-                </div>
-                <div style={styles.rowActions}>
-                  {isEquipped(it) ? (
-                    <button style={styles.smallButton} onClick={() => unequipSlot(it.slot || it.type)}>Unequip</button>
-                  ) : (
-                    <button style={styles.smallButton} onClick={() => equipItem(it)}>Equip</button>
-                  )}
-                  <button style={{ ...styles.smallButton, marginLeft: 8 }} onClick={() => removeFromInventory(it.id)}>Remove</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div style={styles.scrollBox}>
+          {inventory.length === 0 ? (
+            <div style={{ opacity: 0.7, padding: 8 }}>No items yet.</div>
+          ) : (
+            inventory.map(it => renderItemRow(it, 'inventory'))
+          )}
+        </div>
       </div>
 
-      {/* Catalog to add items (dev/demo) */}
+      {/* --- Catalog (Split and Scrollable) --- */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Catalog (add items)</h3>
-        {Object.entries(groupedCatalog).map(([group, list]) => (
-          <div key={group} style={{ marginBottom: 10 }}>
-            <div style={styles.groupTitle}>{group.toUpperCase()}</div>
-            {list.map((it) => (
-              <div key={it.id} style={styles.row}>
-                <div style={styles.rowMain}>
-                  <div style={styles.itemName}>{it.name}</div>
-                  <div style={styles.itemMeta}>
-                    Slot: {it.slot || it.type || '—'}
-                    {it.power ? ` • +${it.power} ATK` : ''}
-                    {typeof it.price === 'number' ? ` • $${it.price}` : ''}
-                  </div>
-                </div>
-                <div style={styles.rowActions}>
-                  <button style={styles.smallButton} onClick={() => addToInventory(it)}>Add</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ))}
+        
+        <div style={styles.groupTitle}>WEAPONS</div>
+        <div style={styles.scrollBox}>
+          {(groupedCatalog.weapon || []).length === 0 ? (
+            <div style={{ opacity: 0.7, padding: 8 }}>No weapons in catalog.</div>
+          ) : (
+            (groupedCatalog.weapon || []).map(it => renderItemRow(it, 'catalog'))
+          )}
+        </div>
+
+        <div style={{ ...styles.groupTitle, marginTop: 16 }}>COSMETICS</div>
+        <div style={styles.scrollBox}>
+          {(groupedCatalog.cosmetic || []).length === 0 ? (
+            <div style={{ opacity: 0.7, padding: 8 }}>No cosmetics in catalog.</div>
+          ) : (
+            (groupedCatalog.cosmetic || []).map(it => renderItemRow(it, 'catalog'))
+          )}
+        </div>
       </div>
+
+      {/* --- Debug Section Removed --- */}
+
     </div>
   );
 }
 
-// Shows what's equipped for a specific slot ("weapon" or "cosmetic")
+// ... (EquippedSlot function remains the same) ...
 function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
   const equippedId = selectedPet?.equipped?.[slot] ?? null;
   const item = inventory.find(i => i.id === equippedId) || null;
@@ -191,6 +204,7 @@ function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
     </div>
   );
 }
+
 
 const styles = {
   wrapper: {
@@ -261,4 +275,12 @@ const styles = {
   itemName: { fontWeight: 'bold' },
   itemMeta: { opacity: 0.7, fontSize: 13 },
   groupTitle: { fontWeight: 'bold', margin: '8px 0' },
+  scrollBox: {
+    maxHeight: '200px',
+    overflowY: 'auto',
+    border: '1px solid #f0f0f0',
+    borderRadius: 5,
+    padding: '0 4px',
+  },
+  // --- Debug Styles Removed ---
 };
