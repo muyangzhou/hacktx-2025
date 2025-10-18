@@ -4,10 +4,24 @@ import { GoogleGenAI } from "@google/genai";
 const apiKey = process.env.GENAI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: apiKey });
 
-async function main() {
+const inctructions = "Analyze the following list of transactions. \
+                      Respond only with a text analysis, not JSON."
+
+
+import fs from 'fs';
+// import path from 'path';
+const filePath = './test.json';
+
+async function main()
+{
+  const jsonString = fs.readFileSync(filePath, 'utf8');
+  const prompt = `${inctructions}\n\n--- TRANSACTION DATA ---\n${jsonString}`;
+
+  console.log(prompt);
+
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: "HAI HAI HAI HAI HAI",
+    contents: prompt,
   });
   console.log(response.text);
 }
