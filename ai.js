@@ -1,3 +1,5 @@
+import fs from 'fs';
+// import path from 'path';\
 import 'dotenv/config';
 import { GoogleGenAI } from "@google/genai";
 
@@ -7,9 +9,6 @@ const ai = new GoogleGenAI({ apiKey: apiKey });
 const inctructions = "Analyze the following list of transactions. \
                       Respond only with a text analysis, not JSON."
 
-
-import fs from 'fs';
-// import path from 'path';
 const filePath = './test.json';
 
 async function main()
