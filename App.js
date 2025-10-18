@@ -45,46 +45,37 @@ export default function App() {
   const addXp = (id, amount) => {
     let petToUpdate = pets.find(p => p.id === id);
     if (!petToUpdate) return;
-
+    
+    // ... (level up logic remains the same) ...
     let newXp = petToUpdate.xp + amount;
     let newLevel = petToUpdate.level;
     let newMaxHp = petToUpdate.maxHp;
     let newAttack = petToUpdate.attack;
     let newXpToNextLevel = petToUpdate.xpToNextLevel;
-
     let leveledUp = false;
-
-    // Check for level up
     if (newXp >= newXpToNextLevel) {
       leveledUp = true;
       newLevel += 1;
-      newXp -= newXpToNextLevel; // Rollover XP
-      newXpToNextLevel = Math.floor(newXpToNextLevel * 1.5); // Increase XP requirement
-      
-      // Stat increases
-      newMaxHp = Math.floor(newMaxHp * 1.2); // +20% max HP
-      newAttack = newAttack + 2; // +2 attack
-      
-      // Grant monetary award for leveling up
+      newXp -= newXpToNextLevel;
+      newXpToNextLevel = Math.floor(newXpToNextLevel * 1.5);
+      newMaxHp = Math.floor(newMaxHp * 1.2);
+      newAttack = newAttack + 2;
       const levelUpGold = 50 * newLevel;
       updateGlobalGold(prev => prev + levelUpGold);
-      
       alert(`${petToUpdate.name} grew to Level ${newLevel}!\nMax HP +${newMaxHp - petToUpdate.maxHp}, Attack +2.\nYou found ${levelUpGold} gold!`);
     }
-
-    // Apply all updates
     updatePet(id, (p) => ({
       ...p,
       xp: newXp,
       level: newLevel,
       maxHp: newMaxHp,
-      hp: leveledUp ? newMaxHp : p.hp, // Heal on level up
+      hp: leveledUp ? newMaxHp : p.hp,
       attack: newAttack,
       xpToNextLevel: newXpToNextLevel
     }));
   };
 
-  // --- "New Day" logic moved from HomeScreen ---
+  // --- "New Day" logic ---
   const handleNewDay = () => {
     if (!selectedPetId) {
       alert("Please select a pet first.");
@@ -124,24 +115,52 @@ export default function App() {
 
   // --- Menu State ---
   const [menuOpen, setMenuOpen] = useState(false);
+  // --- New Debug Menu State ---
+  const [isDebugMenuOpen, setDebugMenuOpen] = useState(false);
 
   const renderMenu = () => {
+    // ... (menu render logic remains the same) ...
     if (!menuOpen) return null;
-
     return (
       <div style={styles.menuOverlay} onClick={() => setMenuOpen(false)}>
         <div style={styles.menuPopup} onClick={(e) => e.stopPropagation()}>
-          <button 
-            style={styles.menuItem} 
-            onClick={() => { alert('Chatbot clicked!'); setMenuOpen(false); }}>
+          <button style={styles.menuItem} onClick={() => { alert('Chatbot clicked!'); setMenuOpen(false); }}>
             Chatbot
           </button>
-          <button 
-            style={styles.menuItem} 
-            onClick={() => { alert('Settings clicked!'); setMenuOpen(false); }}>
+          <button style={styles.menuItem} onClick={() => { alert('Settings clicked!'); setMenuOpen(false); }}>
             Settings
           </button>
         </div>
+      </div>
+    );
+  };
+
+  // --- New Debug Panel Renderer ---
+  const renderDebugMenu = () => {
+    if (!isDebugMenuOpen) return null;
+
+    return (
+      <div style={styles.debugPanel}>
+        <h4 style={styles.debugTitle}>Debug Panel</h4>
+        <button style={styles.debugButton} onClick={handleNewDay}>
+          New Day
+        </button>
+        
+        <h5 style={styles.debugTitle}>Add Custom Item</h5>
+        <input
+          style={styles.debugInput}
+          placeholder="Item Name"
+        />
+        <input
+          style={styles.debugInput}
+          placeholder="Price"
+          type="number"
+        />
+        <button 
+          style={styles.debugButton} 
+          onClick={() => alert('Submit clicked (dummy)')}>
+          Submit Item
+        </button>
       </div>
     );
   };
@@ -168,12 +187,13 @@ export default function App() {
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
         </div>
 
-        {/* --- Render Popup (if open) --- */}
+        {/* --- Render Popups (if open) --- */}
         {renderMenu()}
+        {renderDebugMenu()}
 
-        {/* --- New Day Button (Global) --- */}
-        <button style={styles.newDayButton} onClick={handleNewDay}>
-          New Day
+        {/* --- Debug Toggle Button --- */}
+        <button style={styles.debugToggleButton} onClick={() => setDebugMenuOpen(prev => !prev)}>
+          Debug ⚙️
         </button>
       </div>
     </PetContext.Provider>
@@ -187,7 +207,7 @@ const styles = {
     height: '100vh',
     display: 'flex',
     flexDirection: 'column',
-    position: 'relative', // Added for fixed button positioning
+    position: 'relative',
   },
   headerBar: {
     padding: '10px 20px',
@@ -197,7 +217,7 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     flexShrink: 0,
-    zIndex: 10, // Ensure header is above screen content
+    zIndex: 10,
   },
   goldDisplay: {
     fontSize: 16,
@@ -207,10 +227,9 @@ const styles = {
     flex: 1,
     overflowY: 'auto',
     position: 'relative',
-    paddingBottom: 60, // Add padding so floating button doesn't cover content
+    paddingBottom: 60,
   },
   menuOverlay: {
-    // ... (styles remain same)
     position: 'fixed',
     top: 0,
     left: 0,
@@ -223,7 +242,6 @@ const styles = {
     zIndex: 1000,
   },
   menuPopup: {
-    // ... (styles remain same)
     backgroundColor: 'white',
     padding: '10px',
     borderRadius: '10px',
@@ -233,7 +251,6 @@ const styles = {
     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
   },
   menuItem: {
-    // ... (styles remain same)
     padding: '12px 20px',
     fontSize: '16px',
     border: 'none',
@@ -242,17 +259,53 @@ const styles = {
     textAlign: 'left',
     borderBottom: '1px solid #eee',
   },
-  newDayButton: {
-    position: 'fixed', // Fixed position
-    bottom: 10, // 10px from the bottom
-    right: 10, // 10px from the right
+  // --- Renamed 'newDayButton' to 'debugToggleButton' ---
+  debugToggleButton: {
+    position: 'fixed',
+    bottom: 10,
+    right: 10,
     padding: '10px 15px',
     backgroundColor: '#f0f0f0',
     border: '1px solid #ccc',
     borderRadius: 8,
     cursor: 'pointer',
     fontSize: 14,
-    zIndex: 999, // Above screen, below menu
+    zIndex: 999,
     boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+  },
+  // --- New Debug Panel Styles ---
+  debugPanel: {
+    position: 'fixed',
+    bottom: 50, // Position above the toggle button
+    right: 10,
+    width: 200,
+    backgroundColor: 'white',
+    border: '1px solid #ccc',
+    borderRadius: 8,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    padding: 10,
+    zIndex: 998,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  debugTitle: {
+    margin: 0,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  debugInput: {
+    padding: '8px 10px',
+    fontSize: 14,
+    border: '1px solid #ccc',
+    borderRadius: 5,
+  },
+  debugButton: {
+    padding: '10px',
+    fontSize: 14,
+    cursor: 'pointer',
+    backgroundColor: '#eee',
+    border: '1px solid #ccc',
+    borderRadius: 5,
   }
 };
