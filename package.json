@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@google/genai": "^1.25.0",
+    "axios": "^1.12.2",
     "dotenv": "^17.2.3",
     "expo": "~54.0.13",
     "expo-status-bar": "~3.0.8",
