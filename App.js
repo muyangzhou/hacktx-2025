@@ -5,6 +5,7 @@ import BattleScreen from './BattleScreen';
 import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
+import RosterScreen from './RosterScreen';
 // If using Expo/Native, prefer AsyncStorage; for web-only, localStorage is fine.
 // import AsyncStorage from '@react-native-async-storage/async-storage';
 
