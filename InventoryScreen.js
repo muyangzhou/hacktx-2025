@@ -66,7 +66,6 @@ export default function InventoryScreen({ navigate }) {
   };
 
   // --- Helper to render a single item row ---
-  // (Used for both inventory and catalog)
   const renderItemRow = (it, type) => {
     return (
       <div key={it.id} style={styles.row}>
@@ -113,6 +112,7 @@ export default function InventoryScreen({ navigate }) {
         <div>
           <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
           <div style={{ opacity: 0.7 }}>
+            {/* --- Typo Corrected Below --- */}
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function InventoryScreen({ navigate }) {
         </div>
       </div>
 
-      {/* --- Inventory list (Now Scrollable) --- */}
+      {/* --- Inventory list (Scrollable) --- */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Inventory</h3>
         <div style={styles.scrollBox}>
@@ -156,7 +156,6 @@ export default function InventoryScreen({ navigate }) {
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Catalog (add items)</h3>
         
-        {/* Weapon Catalog */}
         <div style={styles.groupTitle}>WEAPONS</div>
         <div style={styles.scrollBox}>
           {(groupedCatalog.weapon || []).length === 0 ? (
@@ -166,7 +165,6 @@ export default function InventoryScreen({ navigate }) {
           )}
         </div>
 
-        {/* Cosmetic Catalog */}
         <div style={{ ...styles.groupTitle, marginTop: 16 }}>COSMETICS</div>
         <div style={styles.scrollBox}>
           {(groupedCatalog.cosmetic || []).length === 0 ? (
@@ -175,8 +173,10 @@ export default function InventoryScreen({ navigate }) {
             (groupedCatalog.cosmetic || []).map(it => renderItemRow(it, 'catalog'))
           )}
         </div>
-
       </div>
+
+      {/* --- Debug Section Removed --- */}
+
     </div>
   );
 }
@@ -233,7 +233,6 @@ const styles = {
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
-    // Removed overflow: 'hidden' if it was there
   },
   cardTitle: {
     margin: '0 0 8px 0',
@@ -276,12 +275,12 @@ const styles = {
   itemName: { fontWeight: 'bold' },
   itemMeta: { opacity: 0.7, fontSize: 13 },
   groupTitle: { fontWeight: 'bold', margin: '8px 0' },
-  // --- New Style for Scrollable Boxes ---
   scrollBox: {
-    maxHeight: '200px', // Compressed height
-    overflowY: 'auto',  // Vertical scroll
+    maxHeight: '200px',
+    overflowY: 'auto',
     border: '1px solid #f0f0f0',
     borderRadius: 5,
-    padding: '0 4px', // Add a little internal padding
+    padding: '0 4px',
   },
+  // --- Debug Styles Removed ---
 };
