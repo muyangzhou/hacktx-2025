@@ -1,7 +1,7 @@
 // BattleScreen.js
 import React, { useState } from 'react';
 import { usePets } from './App';
-import { petImages } from './assets/petImages'
+import { petImages, weaponImages } from './assets/petImages'
 import { Image } from 'react-native'
 
 export default function BattleScreen({ navigate }) {
