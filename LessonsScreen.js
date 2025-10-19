@@ -1,8 +1,11 @@
+// LessonsScreen.js
 import React, { useState, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Linking, ScrollView } from 'react-native';
 import { usePets } from './App';
 
 export default function LessonsScreen({ navigate }) {
-    const {
+  // ... (All logic functions are unchanged) ...
+  const {
         selectedPet,
         userAge,
         lessonsData,
@@ -63,196 +66,282 @@ export default function LessonsScreen({ navigate }) {
         setAnswers({});
     };
 
-    if (!selectedPet) {
-        return (
-            <div style={styles.container}>
-                <h2>No pet selected</h2>
-                <button style={styles.button} onClick={() => navigate('Home')}>Go to Home</button>
-            </div>
-        );
-    }
-    
-    const renderVideoView = () => (
-        <div style={styles.viewContainer}>
-            <h2 style={styles.title}>Lesson {currentLessonIndex + 1}: {currentLesson.title}</h2>
-            <p style={styles.paragraph}>Watch the video to learn about this topic. When you're done, come back and take the quiz!</p>
-            <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-                <a href={currentLesson.url} target="_blank" rel="noopener noreferrer" style={styles.videoLink} onClick={() => setVideoLinkOpened(true)}>
-                    Watch Video on YouTube
-                </a>
+    const openVideoLink = () => {
+        Linking.openURL(currentLesson.url);
+        setVideoLinkOpened(true);
+    };
+
+
+  if (!selectedPet) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>No pet selected</Text>
+        {/* "Go to Home" button removed from here */}
+      </View>
+    );
+  }
+
+  // ... (renderVideoView, renderQuizView, renderResultsView, renderCertificateView are unchanged) ...
+  const renderVideoView = () => (
+        <View style={styles.viewContainer}>
+            <Text style={styles.title}>Lesson {currentLessonIndex + 1}: {currentLesson.title}</Text>
+            <Text style={styles.paragraph}>Watch the video to learn about this topic. When you're done, come back and take the quiz!</Text>
+            <View style={{alignItems: 'center'}}>
+                <TouchableOpacity style={styles.videoLink} onPress={openVideoLink}>
+                    <Text style={styles.videoLinkText}>Watch Video on YouTube</Text>
+                </TouchableOpacity>
                 {videoLinkOpened && (
-                    <button style={styles.button} onClick={() => setView('quiz')}>I've Watched It, Take the Quiz!</button>
+                    <TouchableOpacity style={styles.button} onPress={() => setView('quiz')}>
+                        <Text style={styles.buttonText}>I've Watched It, Take the Quiz!</Text>
+                    </TouchableOpacity>
                 )}
-            </div>
-        </div>
+            </View>
+        </View>
     );
 
     const renderQuizView = () => (
-        <div style={styles.viewContainer}>
-            <h2 style={styles.title}>Quiz for: {currentLesson.title}</h2>
-            {currentLesson.quiz.map((q, qIndex) => (
-                <div key={qIndex} style={styles.questionContainer}>
-                    <p style={styles.questionText}>{qIndex + 1}. {q.question}</p>
-                    {q.options.map((option, oIndex) => (
-                        <div key={oIndex} style={styles.optionContainer}>
-                            <input
-                                type="radio"
-                                id={`q${qIndex}o${oIndex}`}
-                                name={`q${qIndex}`}
-                                value={option}
-                                checked={answers[qIndex] === option}
-                                onChange={() => handleAnswerSelect(qIndex, option)}
-                                style={{marginRight: '8px'}}
-                            />
-                            <label htmlFor={`q${qIndex}o${oIndex}`}>{option}</label>
-                        </div>
-                    ))}
-                </div>
-            ))}
-            <button style={styles.button} onClick={handleSubmitQuiz}>Submit Answers</button>
-        </div>
+        <View style={styles.viewContainer}>
+            <Text style={styles.title}>Quiz for: {currentLesson.title}</Text>
+            <ScrollView style={styles.scrollBox}>
+                {currentLesson.quiz.map((q, qIndex) => (
+                    <View key={qIndex} style={styles.questionContainer}>
+                        <Text style={styles.questionText}>{qIndex + 1}. {q.question}</Text>
+                        {q.options.map((option, oIndex) => {
+                            const isSelected = answers[qIndex] === option;
+                            return (
+                                <TouchableOpacity 
+                                    key={oIndex} 
+                                    style={styles.optionContainer}
+                                    onPress={() => handleAnswerSelect(qIndex, option)}
+                                >
+                                    <View style={[styles.radioCircle, isSelected && styles.radioCircleSelected]}>
+                                        {isSelected && <View style={styles.radioInnerCircle} />}
+                                    </View>
+                                    <Text style={styles.optionText}>{option}</Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
+                ))}
+            </ScrollView>
+            <TouchableOpacity style={styles.button} onPress={handleSubmitQuiz}>
+                <Text style={styles.buttonText}>Submit Answers</Text>
+            </TouchableOpacity>
+        </View>
     );
     
     const renderResultsView = () => (
-        <div style={styles.viewContainer}>
-            <h2 style={styles.title}>Quiz Results</h2>
-            <p style={styles.scoreText}>You scored {quizResult.score.toFixed(0)}%</p>
-            <p style={styles.paragraph}>({quizResult.correct} out of {quizResult.total} correct)</p>
+        <View style={styles.viewContainer}>
+            <Text style={styles.title}>Quiz Results</Text>
+            <Text style={styles.scoreText}>You scored {quizResult.score.toFixed(0)}%</Text>
+            <Text style={styles.paragraph}>({quizResult.correct} out of {quizResult.total} correct)</Text>
             {quizResult.score >= 70 ? (
-                <div>
-                    <p style={styles.passText}>Congratulations, you passed!</p>
-                    <button style={styles.button} onClick={handleNextLesson}>Continue to Next Lesson</button>
-                </div>
+                <View>
+                    <Text style={styles.passText}>Congratulations, you passed!</Text>
+                    <TouchableOpacity style={styles.button} onPress={handleNextLesson}>
+                        <Text style={styles.buttonText}>Continue to Next Lesson</Text>
+                    </TouchableOpacity>
+                </View>
             ) : (
-                <div>
-                    <p style={styles.failText}>You need to score 70% or higher. Please re-watch the video and try again.</p>
-                    <button style={styles.button} onClick={handleRetry}>Re-watch Video</button>
-                </div>
+                <View>
+                    <Text style={styles.failText}>You need to score 70% or higher. Please re-watch the video and try again.</Text>
+                    <TouchableOpacity style={styles.button} onPress={handleRetry}>
+                        <Text style={styles.buttonText}>Re-watch Video</Text>
+                    </TouchableOpacity>
+                </View>
             )}
-        </div>
+        </View>
     );
 
     const renderCertificateView = () => (
-         <div style={styles.certificate}>
-            <h2 style={styles.title}>Certificate of Completion</h2>
-            <p style={styles.paragraph}>This certifies that</p>
-            <h3 style={styles.certName}>{selectedPet.name}</h3>
-            <p style={styles.paragraph}>has successfully completed the<br/><strong>{userAge <= 14 ? 'Kids' : 'Teens'} Financial Literacy Course</strong>.</p>
-            <p style={styles.certCongrats}>Great job investing in your future!</p>
-        </div>
+         <View style={styles.certificate}>
+            <Text style={styles.title}>Certificate of Completion</Text>
+            <Text style={styles.paragraph}>This certifies that</Text>
+            <Text style={styles.certName}>{selectedPet.name}</Text>
+            <Text style={styles.paragraph}>has successfully completed the{'\n'}
+                <Text style={{fontWeight: 'bold'}}>{userAge <= 14 ? 'Kids' : 'Teens'} Financial Literacy Course</Text>.
+            </Text>
+            <Text style={styles.certCongrats}>Great job investing in your future!</Text>
+        </View>
     );
 
-    return (
-        <div style={styles.container}>
-            {view === 'video' && !isSeriesCompleted && renderVideoView()}
-            {view === 'quiz' && !isSeriesCompleted && renderQuizView()}
-            {view === 'results' && !isSeriesCompleted && renderResultsView()}
-            {isSeriesCompleted && renderCertificateView()}
-            <button style={{ ...styles.button, marginTop: '20px' }} onClick={() => navigate('Home')}>Back to Home</button>
-        </div>
-    );
+
+  return (
+    <View style={styles.container}>
+      {view === 'video' && !isSeriesCompleted && renderVideoView()}
+      {view === 'quiz' && !isSeriesCompleted && renderQuizView()}
+      {view === 'results' && !isSeriesCompleted && renderResultsView()}
+      {isSeriesCompleted && renderCertificateView()}
+      {/* The "Back to Home" button was here and is now removed */}
+    </View>
+  );
 }
 
-const styles = {
-    container: {
-      padding: 20,
-      fontFamily: 'Arial, sans-serif',
-      textAlign: 'center',
-      color: '#FFFFFF',
-      width: '100%',
-      maxWidth: '600px',
-    },
-    viewContainer: {
+const styles = StyleSheet.create({
+  container: {
+    // Padding removed
+    alignItems: 'center',
+    color: '#FFFFFF',
+    width: '100%',
+    flex: 1, 
+    justifyContent: 'center'
+  },
+  // ... (all other styles are unchanged) ...
+  viewContainer: {
         backgroundColor: 'rgba(40, 40, 40, 0.8)',
-        padding: '20px',
-        borderRadius: '8px',
-        border: '1px solid #555',
-        backdropFilter: 'blur(5px)',
+        padding: 20,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#555',
+        width: '100%',
+        marginBottom: 20, 
+        maxHeight: '80%', 
     },
     title: {
       color: '#FFFFFF',
+      fontSize: 22,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 10,
     },
     paragraph: {
         color: '#DDDDDD',
-        lineHeight: '1.6',
+        lineHeight: 22,
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 15,
     },
     button: {
-      padding: '10px 20px',
-      fontSize: '16px',
-      cursor: 'pointer',
-      margin: '10px',
+      padding: 12,
+      fontSize: 16,
+      margin: 10,
       backgroundColor: '#6c757d',
       color: 'white',
-      border: '1px solid #888',
-      borderRadius: '5px',
-      fontWeight: 'bold',
+      borderWidth: 1,
+      borderColor: '#888',
+      borderRadius: 5,
+      alignItems: 'center',
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     videoLink: {
-        display: 'inline-block',
-        padding: '12px 25px',
-        margin: '20px 0',
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        marginVertical: 20,
         backgroundColor: '#c4302b',
+        borderRadius: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    videoLinkText: {
         color: 'white',
-        textDecoration: 'none',
+        textDecorationLine: 'none',
         fontWeight: 'bold',
-        borderRadius: '5px',
-        fontSize: '18px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+        fontSize: 18,
     },
     questionContainer: {
-        margin: '20px 0',
+        marginVertical: 15,
         textAlign: 'left',
-        border: '1px solid #555',
-        padding: '15px',
-        borderRadius: '8px',
+        borderWidth: 1,
+        borderColor: '#555',
+        padding: 15,
+        borderRadius: 8,
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
     },
     questionText: {
         fontWeight: 'bold',
-        marginBottom: '10px',
-        fontSize: '1.1em',
+        marginBottom: 10,
+        fontSize: 17,
         color: '#FFFFFF',
     },
     optionContainer: {
-        margin: '8px 0',
-        padding: '5px',
-        cursor: 'pointer',
+        marginVertical: 8,
+        padding: 5,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    optionText: {
         color: '#DDDDDD',
+        fontSize: 16,
+        flex: 1,
+        lineHeight: 22,
+    },
+    radioCircle: {
+        height: 20,
+        width: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#DDDDDD',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    radioCircleSelected: {
+        borderColor: '#007bff',
+    },
+    radioInnerCircle: {
+        height: 10,
+        width: 10,
+        borderRadius: 5,
+        backgroundColor: '#007bff',
     },
     scoreText: {
-        fontSize: '24px',
+        fontSize: 24,
         fontWeight: 'bold',
-        margin: '10px 0',
+        marginVertical: 10,
         color: '#FFFFFF',
+        textAlign: 'center',
     },
     passText: {
         color: '#28a745',
         fontWeight: 'bold',
-        margin: '10px 0',
+        margin: 10,
+        fontSize: 16,
+        textAlign: 'center',
     },
     failText: {
         color: '#dc3545',
         fontWeight: 'bold',
-        margin: '10px 0',
+        margin: 10,
+        fontSize: 16,
+        textAlign: 'center',
     },
     certificate: {
-        border: '10px solid #6c757d',
-        padding: '30px',
-        borderRadius: '10px',
+        borderWidth: 10,
+        borderColor: '#6c757d',
+        padding: 30,
+        borderRadius: 10,
         backgroundColor: 'rgba(20, 20, 20, 0.9)',
-        maxWidth: '500px',
-        margin: '20px auto',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-        color: '#FFFFFF',
+        width: '100%',
+        marginVertical: 20,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
+        elevation: 8,
     },
     certName: {
-        fontSize: '2em',
+        fontSize: 28,
         color: '#007bff',
-        margin: '10px 0',
+        marginVertical: 10,
+        fontWeight: 'bold',
     },
     certCongrats: {
-        marginTop: '20px',
+        marginTop: 20,
         fontStyle: 'italic',
         color: '#CCCCCC',
+        textAlign: 'center',
+    },
+    scrollBox: {
+        maxHeight: 300, 
+        width: '100%',
+        marginVertical: 10,
     }
-};
+});

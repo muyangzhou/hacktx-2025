@@ -1,8 +1,8 @@
 // HomeScreen.js
 import React from 'react';
-import { usePets } from './App'; // or from a separate PetContext file
-import { petImages } from './assets/petImages'
-import { Image } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { usePets } from './App';
+import { petImages } from './assets/petImages';
 
 export default function HomeScreen({ navigate }) {
   const { 
@@ -33,62 +33,69 @@ export default function HomeScreen({ navigate }) {
 
   if (!selectedPet) {
     return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <p>No pet selected.</p>
-        <button onClick={handleAddPet}>Add First Pet</button>
-      </div>
+      <View style={{ padding: 20, alignItems: 'center' }}>
+        <Text style={{color: 'white', fontSize: 16}}>No pet selected.</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={handleAddPet}>
+            <Text style={styles.buttonText}>Add First Pet</Text>
+        </TouchableOpacity>
+      </View>
     );
   }
 
   const { id, name, level, hp, maxHp, attack, xp, xpToNextLevel } = selectedPet;
 
   return (
-    <div style={styles.container}>
+    <View style={styles.container}>
       {/* --- Pet Browser and Action Hub --- */}
-      <div style={styles.petBrowser}>
-        <button onClick={handlePrevious} style={styles.arrowButton}>{'<'}</button>
+      <View style={styles.petBrowser}>
+        <TouchableOpacity onPress={handlePrevious} style={styles.arrowButton}>
+            <Text style={styles.arrowButtonText}>{'<'}</Text>
+        </TouchableOpacity>
         
-        <div style={styles.petInfo}>
-          <h2>{name}</h2>
-          <div style={styles.petImageContainer}>
+        <View style={styles.petInfo}>
+          <Text style={styles.petName}>{name}</Text>
+          <View style={styles.petImageContainer}>
             <Image
               source={petImages[id]}
               style={{ width: 64, height: 64 }}
               accessibilityLabel={name}
             />
-          </div>
-          <p>Level: {level} ({xp}/{xpToNextLevel} XP)</p>
-          <p>HP: {hp}/{maxHp}</p>
-          <p>Attack: {attack}</p>
+          </View>
+          <Text style={styles.petStatText}>Level: {level} ({xp}/{xpToNextLevel} XP)</Text>
+          <Text style={styles.petStatText}>HP: {hp}/{maxHp}</Text>
+          <Text style={styles.petStatText}>Attack: {attack}</Text>
           
-          <div style={styles.petActions}>
-            <button style={styles.actionButton} onClick={() => navigate('Battle')}>Battle</button>
-            <button style={styles.actionButton} onClick={() => navigate('Inventory')}>Inventory</button>
-          </div>
-        </div>
+          <View style={styles.petActions}>
+            <TouchableOpacity style={styles.actionButton} onPress={() => navigate('Battle')}>
+                <Text style={styles.buttonText}>Battle</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={() => navigate('Inventory')}>
+                <Text style={styles.buttonText}>Inventory</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
-        <button onClick={handleNext} style={styles.arrowButton}>{'>'}</button>
-      </div>
+        <TouchableOpacity onPress={handleNext} style={styles.arrowButton}>
+            <Text style={styles.arrowButtonText}>{'>'}</Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* --- Global Action Buttons --- */}
-      <div style={styles.globalActions}>
-        <button style={styles.globalButton} onClick={() => navigate('Lessons')}>Video Lessons</button>
-        <button style={styles.globalButton} onClick={() => navigate('Bank')}>Bank</button>
-        <button style={styles.globalButton} onClick={() => navigate('Shop', { view: 'pets' })}>Buy Pets</button>
-      </div>
-    </div>
+      {/* --- Global Action Buttons (REMOVED) --- */}
+      {/* This section is now handled by the footer in App.js */}
+    </View>
   );
 }
 
-// --- Styles for this screen ---
-const styles = {
+const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    // Padding removed, handled by App.js
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
-    boxSizing: 'border-box',
+    width: '100%',
     alignItems: 'center',
+    justifyContent: 'flex-start', // Changed from 'space-between'
+    paddingTop: 20, // Add some top padding
   },
   petBrowser: {
     display: 'flex',
@@ -96,54 +103,62 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#a2a2a3',
+    backgroundColor: 'rgba(162, 162, 163, 0.8)',
     borderRadius: 8,
     maxWidth: 420,
     width: '100%',
-    margin: '0 auto',
   },
   arrowButton: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    padding: '10px 15px',
-    cursor: 'pointer',
-    border: 'none',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     backgroundColor: '#eee',
     borderRadius: 5,
     alignSelf: 'stretch',
+    justifyContent: 'center'
+  },
+  arrowButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   petInfo: {
-    textAlign: 'center',
+    // textAlign: 'center', // Not needed, alignItems on children
     flex: 1,
-    padding: '0 10px',
+    paddingHorizontal: 10,
+    alignItems: 'center', // Center pet info
+  },
+  petName: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 5,
+      color: '#FFFFFF'
+  },
+  petStatText: {
+    color: '#FFFFFF',
+    fontSize: 14,
   },
   petActions: {
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'center',
     gap: 10,
     marginTop: 16,
   },
   actionButton: {
-    padding: '8px 12px',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     fontSize: 14,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
   },
-  globalActions: {
-    marginTop: 'auto', // Pushes this section to the bottom
-    paddingTop: 20,
-    display: 'flex',
-    gap: 10,
-  },
-  globalButton: {
-    flex: 1, // Make buttons share space
-    padding: '12px',
-    fontSize: 16,
-    fontWeight: 'bold',
+  buttonText: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
+      textAlign: 'center',
   },
   petImageContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    margin: '10px 0',
+    marginVertical: 10,
   },
-};
-
+});

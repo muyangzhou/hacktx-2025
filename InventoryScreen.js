@@ -1,12 +1,12 @@
 // InventoryScreen.js
 import React, { useMemo } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, ScrollView } from 'react-native';
 import { usePets } from './App';
-import items from './items.json'; // if your bundler complains, see note below
-import { petImages, weaponImages } from './assets/petImages'
-import { Image } from 'react-native'
+import items from './items.json'; 
+import { petImages, weaponImages } from './assets/petImages';
 
 export default function InventoryScreen({ navigate }) {
-  // ... (all helper functions remain the same) ...
+  // ... (All logic functions are unchanged) ...
   const { selectedPet, updatePet, globalGold, updateGlobalGold } = usePets();
   const inventory = selectedPet?.inventory ?? [];
   const groupedCatalog = useMemo(() => {
@@ -18,23 +18,22 @@ export default function InventoryScreen({ navigate }) {
     }
     return groups;
   }, []);
-    const addToInventory = (catalogItem) => {
+
+  const addToInventory = (catalogItem) => {
     const price = Number(catalogItem.price ?? 0);
-    // already owned?
     const alreadyOwned = (selectedPet?.inventory || []).some(i => i.id === catalogItem.id);
     if (alreadyOwned) return alert(`${catalogItem.name} is already in your inventory.`);
-    // funds check
     if (globalGold < price) {
         return alert(`Not enough gold! Need ${price - globalGold} more.`);
     }
-    // pay then add to pet inventory
     updateGlobalGold(prev => prev - price);
     updatePet(selectedPet.id, (p) => ({
         ...p,
         inventory: [ ...(p.inventory || []), { ...catalogItem, ownedAt: Date.now() } ]
     }));
     alert(`${selectedPet.name} bought ${catalogItem.name}!`);
-    };
+  };
+
   const removeFromInventory = (itemId) => {
     updatePet(selectedPet.id, (p) => {
       const inv = (p.inventory || []).filter(i => i.id !== itemId);
@@ -44,6 +43,7 @@ export default function InventoryScreen({ navigate }) {
       return { inventory: inv, ...(Object.keys(unequip).length ? unequip : {}) };
     });
   };
+  
   const equipItem = (item) => {
     const slot = item.slot || item.type;
     if (!slot) return;
@@ -53,6 +53,7 @@ export default function InventoryScreen({ navigate }) {
       return { equipped };
     });
   };
+
   const unequipSlot = (slot) => {
     updatePet(selectedPet.id, (p) => {
       const equipped = { ...(p.equipped || {}) };
@@ -60,138 +61,134 @@ export default function InventoryScreen({ navigate }) {
       return { equipped };
     });
   };
+
   const isEquipped = (item) => {
     const slot = item.slot || item.type;
     return Boolean(selectedPet?.equipped && selectedPet.equipped[slot] === item.id);
   };
+
   const renderItemRow = (it, type) => {
+    // ... (logic unchanged) ...
+    const isOwned = (selectedPet?.inventory || []).some(x => x.id === it.id);
+    const canAfford = globalGold >= (Number(it.price) || 0);
+
     return (
-      <div key={it.id} style={styles.row}>
-        <div style={styles.rowMain}>
-          <div style={styles.itemName}>{it.name}</div>
+      <View key={it.id} style={styles.row}>
+        <View style={styles.rowMain}>
+          <Text style={styles.itemName}>{it.name}</Text>
           <Image
             source={weaponImages[it.id]}
-            style={{ width: 20, height: 20 }}
+            style={{ width: 20, height: 20, marginVertical: 4 }}
             accessibilityLabel={it.name}
             />
-          <div style={styles.itemMeta}>
+          <Text style={styles.itemMeta}>
             Slot: {it.slot || it.type || '—'}
             {it.power ? ` • +${it.power} ATK` : ''}
             {type === 'catalog' && typeof it.price === 'number' ? ` • $${it.price}` : ''}
-          </div>
-        </div>
-        <div style={styles.rowActions}>
+          </Text>
+        </View>
+        <View style={styles.rowActions}>
           {type === 'inventory' ? (
             <>
               {isEquipped(it) ? (
-                <button style={styles.smallButton} onClick={() => unequipSlot(it.slot || it.type)}>Unequip</button>
+                <TouchableOpacity style={styles.smallButton} onPress={() => unequipSlot(it.slot || it.type)}>
+                    <Text style={styles.smallButtonText}>Unequip</Text>
+                </TouchableOpacity>
               ) : (
-                <button style={styles.smallButton} onClick={() => equipItem(it)}>Equip</button>
+                <TouchableOpacity style={styles.smallButton} onPress={() => equipItem(it)}>
+                    <Text style={styles.smallButtonText}>Equip</Text>
+                </TouchableOpacity>
               )}
-              <button style={{ ...styles.smallButton, marginLeft: 8 }} onClick={() => removeFromInventory(it.id)}>Remove</button>
+              <TouchableOpacity style={{ ...styles.smallButton, marginLeft: 8 }} onPress={() => removeFromInventory(it.id)}>
+                <Text style={styles.smallButtonText}>Remove</Text>
+              </TouchableOpacity>
             </>
           ) : (
-            <button
-            style={styles.smallButton}
-            onClick={() => addToInventory(it)}
-            disabled={(selectedPet?.inventory || []).some(x => x.id === it.id) || (globalGold < (Number(it.price) || 0))}
-            title={
-                (selectedPet?.inventory || []).some(x => x.id === it.id)
-                ? 'Already owned'
-                : (globalGold < (Number(it.price) || 0))
-                    ? `Need ${Number(it.price) - globalGold} more gold`
-                    : 'Add to inventory'
-            }
+            <TouchableOpacity
+                style={[styles.smallButton, (isOwned || !canAfford) && styles.smallButtonDisabled]}
+                onPress={() => addToInventory(it)}
+                disabled={isOwned || !canAfford}
             >
-            { (selectedPet?.inventory || []).some(x => x.id === it.id) ? 'Owned' : `Add ($${it.price ?? 0})` }
-            </button>
+                <Text style={styles.smallButtonText}>
+                    { isOwned ? 'Owned' : `Add ($${it.price ?? 0})` }
+                </Text>
+            </TouchableOpacity>
           )}
-        </div>
-      </div>
+        </View>
+      </View>
     );
   };
 
   if (!selectedPet) {
     return (
-      <div style={styles.container}>
-        <h2>No pet selected</h2>
-        <button style={styles.button} onClick={() => navigate('Home')}>Go to Home</button>
-      </div>
+      <View style={styles.container}>
+        <Text style={styles.cardTitle}>No pet selected</Text>
+        {/* "Go to Home" button removed from here */}
+      </View>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
-      {/* ... (Header and Equipped sections remain same) ... */}
-      <div style={styles.header}>
-        <div>
-          <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
-          <div style={styles.petImageContainer}>
+    // The main wrapper is now a ScrollView to handle many items
+    <ScrollView style={styles.wrapper}>
+      <View style={styles.header}>
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.petName}>{selectedPet.name}</Text>
+          <View style={styles.petImageContainer}>
             <Image
                 source={petImages[selectedPet.id]}
                 style={{ width: 64, height: 64 }}
                 accessibilityLabel={selectedPet.name}
             />
-            </div>
-          <div style={{ opacity: 0.7 }}>
+            </View>
+          <Text style={styles.petStats}>
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
-          </div>
-        </div>
-        <button style={styles.button} onClick={() => navigate('Home')}>Back</button>
-      </div>
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Equipped</h3>
-        <div style={styles.equippedRow}>
+          </Text>
+        </View>
+        {/* The "Back" button was here and is now removed */}
+      </View>
+      
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Equipped</Text>
+        <View style={styles.equippedRow}>
           <EquippedSlot label="Weapon" slot="weapon" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('weapon')} />
-          {/* {<EquippedSlot label="Cosmetic" slot="cosmetic" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('cosmetic')} />} */}
-        </div>
-      </div>
+        </View>
+      </View>
 
-      {/* --- Inventory list (Scrollable) --- */}
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Inventory</h3>
-        <div style={styles.scrollBox}>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Inventory</Text>
+        <ScrollView style={styles.scrollBox}>
           {inventory.length === 0 ? (
-            <div style={{ opacity: 0.7, padding: 8 }}>No items yet.</div>
+            <Text style={styles.emptyText}>No items yet.</Text>
           ) : (
             inventory.map(it => renderItemRow(it, 'inventory'))
           )}
-        </div>
-      </div>
+        </ScrollView>
+      </View>
 
-      {/* --- Catalog (Split and Scrollable) --- */}
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Catalog (add items)</h3>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Catalog (add items)</Text>
         
-        <div style={styles.groupTitle}>WEAPONS</div>
-        <div style={styles.scrollBox}>
+        <Text style={styles.groupTitle}>WEAPONS</Text>
+        <ScrollView style={styles.scrollBox}>
           {(groupedCatalog.weapon || []).length === 0 ? (
-            <div style={{ opacity: 0.7, padding: 8 }}>No weapons in catalog.</div>
+            <Text style={styles.emptyText}>No weapons in catalog.</Text>
           ) : (
             (groupedCatalog.weapon || []).map(it => renderItemRow(it, 'catalog'))
           )}
-        </div>
-
-        {/* {<div style={{ ...styles.groupTitle, marginTop: 16 }}>COSMETICS</div>
-        <div style={styles.scrollBox}>
-          {(groupedCatalog.cosmetic || []).length === 0 ? (
-            <div style={{ opacity: 0.7, padding: 8 }}>No cosmetics in catalog.</div>
-          ) : (
-            (groupedCatalog.cosmetic || []).map(it => renderItemRow(it, 'catalog'))
-          )}
-        </div>} */}
-      </div>
-    </div>
+        </ScrollView>
+      </View>
+    </ScrollView>
   );
 }
 
-// ... (EquippedSlot function remains the same) ...
+// ... (EquippedSlot function is unchanged) ...
 function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
   const equippedId = selectedPet?.equipped?.[slot] ?? null;
   const item = inventory.find(i => i.id === equippedId) || null;
   return (
-    <div style={styles.equippedSlot}>
-      <div style={styles.equippedLabel}>{label}</div>
+    <View style={styles.equippedSlot}>
+      <Text style={styles.equippedLabel}>{label}</Text>
       {item ? (
         <>
         
@@ -200,69 +197,87 @@ function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
             style={{ width: 20, height: 20 }}
             accessibilityLabel={item.name}
             />
-          <div style={styles.itemName}>{item.name}</div>
-          <div style={styles.itemMeta}>
-            Slot: {item.slot || item.type}
+          <View style={styles.itemName}><Text>{item.name}</Text></View>
+          <View style={styles.itemMeta}>
+            <Text>Slot: {item.slot || item.type}
             {item.power ? ` • +${item.power} ATK` : ''}
-          </div>
+            </Text>
+          </View>
         </>
       ) : (
-        <div style={{ opacity: 0.6 }}>Nothing equipped</div>
+        <Text style={styles.emptyText}>Nothing equipped</Text>
       )}
-    </div>
+    </View>
   );
 }
 
 
-const styles = {
-  // ... (other styles remain same) ...
+const styles = StyleSheet.create({
   wrapper: {
-    padding: 20,
-    fontFamily: 'Arial, sans-serif',
-    maxWidth: 800,
-    margin: '0 auto',
+    // Padding removed, handled by App.js
+    width: '100%',
+    height: '100%',
   },
   container: {
-    padding: 20,
-    fontFamily: 'Arial, sans-serif',
+    // Padding removed
+    width: '100%',
+    alignItems: 'center',
   },
   header: {
     display: 'flex',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center', // Changed from space-between
     alignItems: 'center',
     marginBottom: 16,
-    backgroundColor: '#a2a2a2',
+    backgroundColor: 'rgba(162, 162, 162, 0.8)',
     borderRadius: 10,
-    textAlign: 'center',
-    gap: 16,
+    padding: 15,
+  },
+  // ... (all other styles are unchanged) ...
+  petName: {
+      fontSize: 20,
+      fontWeight: 'bold',
+  },
+  petStats: {
+      opacity: 0.7,
   },
   button: {
-    padding: '8px 12px',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     fontSize: 14,
-    cursor: 'pointer',
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  buttonText: {
+      color: '#FFFFFF',
+      fontWeight: 'bold',
   },
   card: {
-    border: '1px solid #e5e5e5',
+    borderWidth: 1,
+    borderColor: '#555',
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
-    backgroundColor: '#a2a2a2',
-    minHeight: 150,
+    backgroundColor: 'rgba(162, 162, 162, 0.8)',
   },
   cardTitle: {
-    margin: '0 0 8px 0',
+    margin: 0,
+    marginBottom: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   equippedRow: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+    display: 'flex',
+    flexDirection: 'row',
     gap: 12,
-    alignItems: 'stretch',
   },
   equippedSlot: {
-    border: '1px solid #eee',
+    borderWidth: 1,
+    borderColor: '#555',
     borderRadius: 8,
     padding: 12,
     minHeight: 80,
+    flex: 1,
   },
   equippedLabel: {
     fontWeight: 'bold',
@@ -270,39 +285,56 @@ const styles = {
   },
   row: {
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 8,
-    borderBottom: '1px solid #f3f3f3',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#555',
   },
   rowMain: {
     display: 'flex',
     flexDirection: 'column',
+    flex: 1,
   },
   rowActions: {
     display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
   },
   smallButton: {
-    padding: '6px 10px',
-    fontSize: 13,
-    cursor: 'pointer',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  smallButtonDisabled: {
+      backgroundColor: '#6c757d',
+      opacity: 0.7,
+  },
+  smallButtonText: {
+      color: '#FFFFFF',
+      fontSize: 13,
   },
   itemName: { fontWeight: 'bold' },
   itemMeta: { opacity: 0.7, fontSize: 13 },
-  groupTitle: { fontWeight: 'bold', margin: '8px 0' },
-  // --- Updated Style ---
+  groupTitle: { fontWeight: 'bold', marginVertical: 8, fontSize: 16 },
   scrollBox: {
-    maxHeight: '150px', // Changed from 200px
-    overflowY: 'auto',
-    border: '1px solid #f0f0f0',
+    maxHeight: 150, 
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#555',
     borderRadius: 5,
-    padding: '0 4px',
+    padding: 4,
   },
   petImageContainer: {
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
-    margin: '10px 0',
+    alignItems: 'center', // Changed
+    marginVertical: 10,
   },
-};
+  emptyText: {
+      opacity: 0.7,
+      padding: 8,
+  }
+});

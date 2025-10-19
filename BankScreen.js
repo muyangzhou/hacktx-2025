@@ -1,19 +1,19 @@
 // BankScreen.js
 import React, { useState } from 'react';
 import { usePets } from './App';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 
 const NESSIE_API_URL = 'http://localhost:3001/api/nessie';
 const GENAI_API_URL = 'http://localhost:3001/api/ai';
 const DUMMY_ACCOUNT_ID = '68f426849683f20dd519ff49';
 
 const BankScreen = ({ navigate }) => {
-  const [accountLinked, setAccountLinked] = useState(true); // Default to true for styling
+  // ... (State and logic functions are unchanged) ...
+  const [accountLinked, setAccountLinked] = useState(true); 
   const [savings, setSavings] = useState('');
-  const [view, setView] = useState('main'); // 'main' or 'history'
+  const [view, setView] = useState('main'); 
   const [transactions, setTransactions] = useState(null); 
   const [analysisScore, setAnalysisScore] = useState(null); 
-
   const { globalGold, updateGlobalGold } = usePets();
 
   const handleAddSavings = () => {
@@ -29,6 +29,7 @@ const BankScreen = ({ navigate }) => {
   };
 
   const handleFetchTransactions = async () => {
+    // ... (logic unchanged) ...
     setView('history');
     setTransactions("Loading transactions...");
     setAnalysisScore("Analyzing..."); 
@@ -94,8 +95,18 @@ const BankScreen = ({ navigate }) => {
     }
   };
 
+  // ... (renderMainView and renderHistoryView are unchanged) ...
   const renderMainView = () => (
     <>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Account Actions</Text>
+        <TouchableOpacity style={{...styles.button, backgroundColor: '#4CAF50'}} onPress={handleFetchTransactions}>
+            <Text style={styles.buttonText}>View Transactions & Get AI Score</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{...styles.button, backgroundColor: '#007bff'}} onPress={() => navigate('ReceiptUpload')}>
+            <Text style={styles.buttonText}>Upload Receipt for Gold</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Savings Account</Text>
         <Text style={styles.paragraph}>Current Gold: {globalGold}</Text>
@@ -111,15 +122,7 @@ const BankScreen = ({ navigate }) => {
             <Text style={styles.buttonText}>Add Savings & Get Reward</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Account Actions</Text>
-        <TouchableOpacity style={{...styles.button, backgroundColor: '#4CAF50'}} onPress={handleFetchTransactions}>
-            <Text style={styles.buttonText}>View Transactions & Get AI Score</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{...styles.button, backgroundColor: '#007bff'}} onPress={() => navigate('ReceiptUpload')}>
-            <Text style={styles.buttonText}>Upload Receipt for Gold</Text>
-        </TouchableOpacity>
-      </View>
+      
     </>
   );
 
@@ -140,19 +143,21 @@ const BankScreen = ({ navigate }) => {
                             <Text style={[styles.tableCell, { flex: 4, fontWeight: 'bold' }]}>Description</Text>
                             <Text style={[styles.tableCell, { flex: 2, fontWeight: 'bold', textAlign: 'right' }]}>Amount</Text>
                         </View>
-                        {isArray && sortedTransactions.length > 0 ? (
-                            sortedTransactions.map((t, index) => (
-                                <View key={index} style={styles.tableRow}>
-                                    <Text style={[styles.tableCell, { flex: 2 }]}>{t.purchase_date || t.transaction_date || 'N/A'}</Text>
-                                    <Text style={[styles.tableCell, { flex: 4 }]}>{t.description || t.type || 'Unknown'}</Text>
-                                    <Text style={[styles.tableCell, { flex: 2, textAlign: 'right' }]}>
-                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(t.amount)}
-                                    </Text>
-                                </View>
-                            ))
-                        ) : (
-                            <Text style={styles.paragraph}>No transactions found.</Text>
-                        )}
+                        <ScrollView style={styles.scrollBox}>
+                            {isArray && sortedTransactions.length > 0 ? (
+                                sortedTransactions.map((t, index) => (
+                                    <View key={index} style={styles.tableRow}>
+                                        <Text style={[styles.tableCell, { flex: 2 }]}>{t.purchase_date || t.transaction_date || 'N/A'}</Text>
+                                        <Text style={[styles.tableCell, { flex: 4 }]}>{t.description || t.type || 'Unknown'}</Text>
+                                        <Text style={[styles.tableCell, { flex: 2, textAlign: 'right' }]}>
+                                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(t.amount)}
+                                        </Text>
+                                    </View>
+                                ))
+                            ) : (
+                                <Text style={styles.paragraph}>No transactions found.</Text>
+                            )}
+                        </ScrollView>
                     </View>
                 )}
             </View>
@@ -175,11 +180,13 @@ const BankScreen = ({ navigate }) => {
                                 <Text style={[styles.paragraph, { color: '#dc3545', fontWeight: 'bold' }]}>Analysis Error</Text>
                             )}
                             <Text style={{...styles.paragraph, fontWeight: 'bold', textAlign: 'left', alignSelf: 'stretch', marginTop: 10 }}>Key Reasonings:</Text>
-                            <View style={{alignSelf: 'stretch', paddingLeft: 20}}>
-                                {analysisScore.reasoning.map((point, index) => (
-                                    <Text key={index} style={{...styles.paragraph, textAlign: 'left', marginVertical: 4}}>• {point}</Text>
-                                ))}
-                            </View>
+                            <ScrollView style={styles.scrollBox}>
+                                <View style={{alignSelf: 'stretch', paddingLeft: 20}}>
+                                    {analysisScore.reasoning.map((point, index) => (
+                                        <Text key={index} style={{...styles.paragraph, textAlign: 'left', marginVertical: 4}}>• {point}</Text>
+                                    ))}
+                                </View>
+                            </ScrollView>
                         </>
                     )}
                 </View>
@@ -187,6 +194,7 @@ const BankScreen = ({ navigate }) => {
         </>
     );
   };
+
 
   return (
     <View style={styles.container}>
@@ -197,59 +205,64 @@ const BankScreen = ({ navigate }) => {
       ) : (
         <View style={styles.card}>
             <Text style={styles.paragraph}>Link your bank account to get started.</Text>
-            {/* In a real app, this would trigger a service like Plaid */}
             <TouchableOpacity style={styles.button} onPress={() => setAccountLinked(true)}>
                 <Text style={styles.buttonText}>Link Bank Account</Text>
             </TouchableOpacity>
         </View>
       )}
       
-      <TouchableOpacity 
-        style={{...styles.button, backgroundColor: '#6c757d', marginTop: 20}} 
-        onPress={() => view === 'main' ? navigate('Home') : setView('main')}>
-        <Text style={styles.buttonText}>{view === 'main' ? 'Back to Home' : 'Back to Bank'}</Text>
-      </TouchableOpacity>
+      {/* --- THIS BUTTON IS MODIFIED --- */}
+      {/* It only renders in history view and only navigates INTERNALLY */}
+      {view === 'history' && (
+        <TouchableOpacity 
+          style={{...styles.button, backgroundColor: '#6c757d', marginTop: 20}} 
+          onPress={() => setView('main')}>
+          <Text style={styles.buttonText}>Back to Bank</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
     container: {
-        padding: 20,
+        // Removed padding, as it's now handled by contentArea in App.js
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
-        height: '100%',
+        flex: 1, // Use flex: 1 to fill available space
     },
     card: {
         width: '100%',
         maxWidth: 600,
-        padding: '20px',
+        padding: 20,
         backgroundColor: 'rgba(40, 40, 40, 0.85)',
         borderRadius: 10,
-        border: '1px solid #555',
+        borderWidth: 1,
+        borderColor: '#555',
         alignItems: 'center',
         marginBottom: 20,
     },
     title: {
         color: '#FFFFFF',
-        fontSize: '24px',
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: '20px',
+        marginBottom: 20,
         textAlign: 'center',
     },
     cardTitle: {
         color: '#FFFFFF',
-        fontSize: '20px',
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: '15px',
+        marginBottom: 15,
     },
+    // ... (all other styles are unchanged) ...
     paragraph: {
         color: '#DDDDDD',
-        marginBottom: '15px',
+        marginBottom: 15,
         lineHeight: 22,
-        fontSize: '16px',
+        fontSize: 16,
         textAlign: 'center',
     },
     input: {
@@ -265,7 +278,8 @@ const styles = {
     },
     button: {
         width: '100%',
-        padding: '12px 20px',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -274,16 +288,17 @@ const styles = {
     buttonText: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: '16px',
+        fontSize: 16,
     },
     bigScore: {
-        fontSize: '48px',
+        fontSize: 48,
         fontWeight: '900',
         marginVertical: 10,
     },
     table: {
         width: '100%',
-        border: '1px solid #555',
+        borderWidth: 1,
+        borderColor: '#555',
         borderRadius: 5,
         overflow: 'hidden',
     },
@@ -299,11 +314,15 @@ const styles = {
         borderColor: '#555',
     },
     tableCell: {
-        padding: '10px',
+        padding: 10,
         color: '#DDDDDD',
-        fontSize: '14px',
+        fontSize: 14,
+        flex: 1,
+    },
+    scrollBox: {
+        maxHeight: 200, 
+        width: '100%',
     }
-};
+});
 
 export default BankScreen;
-

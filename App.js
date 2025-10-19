@@ -1,24 +1,37 @@
-const API_URL = 'http://localhost:3001/api/ai';
-const NESSIE2_URL = 'http://localhost:3001/api/nessie2';
 // App.js
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import HomeScreen from './HomeScreen';
 import BattleScreen from './BattleScreen';
 import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
 import LessonsScreen from './LessonsScreen';
-import ReceiptUploadScreen from './ReceiptUploadScreen'; // Import the new screen
+import ReceiptUploadScreen from './ReceiptUploadScreen';
 import lessonsData from './lessons.json';
+
+const API_URL = 'http://localhost:3001/api/ai';
+const NESSIE2_URL = 'http://localhost:3001/api/nessie2';
 
 export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
+  // ... (All your existing state and functions remain unchanged) ...
   const [globalGold, setGlobalGold] = useState(150);
-  const [userAge, setUserAge] = useState(10); // Default age for kids series
+  const [userAge, setUserAge] = useState(10);
   const [pets, setPets] = useState([
-    // Add lesson progress tracking to each pet's state
     { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
     { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
   ]);
@@ -35,7 +48,6 @@ export default function App() {
       )
     );
   const addPet = (pet) => {
-    // New pets also get lesson tracking state
     const newPet = { ...pet, lessonProgress: 0, lessonsCompleted: false };
     setPets(prev => [...prev, newPet]);
 
@@ -74,7 +86,6 @@ export default function App() {
     alert(`New Day: Found ${randomAmount} gold and lost ${hpLoss} HP!`);
   };
   
-  // --- New Lesson Functions ---
   const advanceLesson = (id) => {
     updatePet(id, p => ({ lessonProgress: p.lessonProgress + 1 }));
   };
@@ -83,7 +94,7 @@ export default function App() {
       const pet = pets.find(p => p.id === id);
       if (pet && !pet.lessonsCompleted) {
           updatePet(id, () => ({ lessonsCompleted: true }));
-          updateGlobalGold(prev => prev + 250); // Big reward for finishing the series!
+          updateGlobalGold(prev => prev + 250);
           alert("Congratulations! You've completed all lessons and earned 250 gold!");
       }
   };
@@ -92,7 +103,7 @@ export default function App() {
     pets, selectedPet, selectedPetId, setSelectedPetId,
     updatePet, addPet, setPets,
     globalGold, updateGlobalGold, addXp,
-    userAge, lessonsData, advanceLesson, markLessonsCompleted, // Expose lesson data and functions
+    userAge, lessonsData, advanceLesson, markLessonsCompleted,
   }), [pets, selectedPet, selectedPetId, globalGold, userAge]);
 
   const [screen, setScreen] = useState('Home');
@@ -114,17 +125,24 @@ export default function App() {
     setDebugAgeInput(userAge.toString());
   }, [userAge]);
 
-  const handleChatSubmit = async (e) => {
-    e.preventDefault();
+  const handleChatSubmit = async () => {
+    // ... (chat submit logic is unchanged) ...
     if (!chatInput.trim() || isBotTyping) return;
     const newUserMessage = { role: 'user', text: chatInput };
-    const userContext = await fetch(NESSIE2_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: "68f426849683f20dd519ff49" }),
-    });
-    // if (!response.ok) throw new Error('Network response was not ok');
-    const data2 = await userContext.json();
+    
+    let data2 = { text: "" };
+    try {
+        const userContext = await fetch(NESSIE2_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: "68f426849683f20dd519ff49" }),
+        });
+        if (userContext.ok) {
+           data2 = await userContext.json();
+        }
+    } catch (e) {
+        console.warn("Could not fetch user context", e);
+    }
 
     setChatMessages(prev => [...prev, newUserMessage]);
     const currentInput = "Condense your answer into 5 action points and put them into bullet points. \
@@ -132,8 +150,6 @@ export default function App() {
     setChatInput('');
     setIsBotTyping(true);
     try {
-      // --- This is where you call your server ---
-      // (You will need to create this server and deploy it)
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,12 +157,8 @@ export default function App() {
       });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-      // alert("data: " + data.text);
-      const botResponse = { role: 'bot', text: data.text }; // Assuming your server returns { text: "..." }
+      const botResponse = { role: 'bot', text: data.text };
       setChatMessages(prev => [...prev, botResponse]);
-      // --- End API Call ---
-      // console.log(await promptAI("<prompt>"));
-
     } catch (error) {
       console.error("Error fetching AI response:", error);
       const errorResponse = { role: 'bot', text: "Sorry, I'm having trouble connecting right now." };
@@ -156,23 +168,33 @@ export default function App() {
     }
   };
 
+  // ... (renderMenu, renderDebugMenu, renderChatbot functions are unchanged) ...
   const renderMenu = () => {
-    if (!menuOpen) return null;
     return (
-      <div style={styles.menuOverlay} onClick={() => setMenuOpen(false)}>
-        <div style={styles.menuPopup} onClick={(e) => e.stopPropagation()}>
-          <button style={styles.menuItem} onClick={() => { setChatOpen(true); setMenuOpen(false); }}>
-            Chatbot
-          </button>
-          <button style={styles.menuItem} onClick={() => { alert('Settings clicked!'); setMenuOpen(false); }}>
-            Settings
-          </button>
-        </div>
-      </div>
+      <Modal
+        visible={menuOpen}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setMenuOpen(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuOpen(false)}>
+          <View style={styles.menuOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.menuPopup}>
+                <TouchableOpacity style={styles.menuItem} onPress={() => { setChatOpen(true); setMenuOpen(false); }}>
+                  <Text style={styles.menuItemText}>Chatbot</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => { alert('Settings clicked!'); setMenuOpen(false); }}>
+                  <Text style={styles.menuItemText}>Settings</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     );
   };
 
-  // --- Updated Debug Menu ---
   const renderDebugMenu = () => {
     if (!isDebugMenuOpen) return null;
 
@@ -180,7 +202,6 @@ export default function App() {
         const ageNum = parseInt(debugAgeInput, 10);
         if (!isNaN(ageNum) && ageNum > 0) {
             setUserAge(ageNum);
-            // Reset pet progress when changing age categories to avoid index issues
             pets.forEach(p => updatePet(p.id, () => ({lessonProgress: 0, lessonsCompleted: false})));
             alert(`User age set to ${ageNum}. Lesson series updated and progress reset.`);
         } else {
@@ -189,222 +210,406 @@ export default function App() {
     };
 
     return (
-      <div style={styles.debugPanel}>
-        <h4 style={styles.debugTitle}>Debug Panel</h4>
-        <button style={styles.debugButton} onClick={handleNewDay}>New Day</button>
+      <View style={styles.debugPanel}>
+        <Text style={styles.debugTitle}>Debug Panel</Text>
+        <TouchableOpacity style={styles.debugButton} onPress={handleNewDay}>
+            <Text>New Day</Text>
+        </TouchableOpacity>
         
-        <h5 style={styles.debugTitle}>Set User Age</h5>
-        <input
+        <Text style={styles.debugTitle}>Set User Age</Text>
+        <TextInput
             style={styles.debugInput}
             placeholder="User Age"
-            type="number"
+            keyboardType="numeric"
             value={debugAgeInput}
-            onChange={(e) => setDebugAgeInput(e.target.value)}
+            onChangeText={setDebugAgeInput}
         />
-        <button style={styles.debugButton} onClick={handleSetAge}>Set Age</button>
+        <TouchableOpacity style={styles.debugButton} onPress={handleSetAge}>
+            <Text>Set Age</Text>
+        </TouchableOpacity>
 
-        <h5 style={styles.debugTitle}>Add Custom Item</h5>
-        <input style={styles.debugInput} placeholder="Item Name" />
-        <input style={styles.debugInput} placeholder="Price" type="number" />
-        <button style={styles.debugButton} onClick={() => alert('Submit clicked (dummy)')}>Submit Item</button>
-      </div>
+        <Text style={styles.debugTitle}>Add Custom Item</Text>
+        <TextInput style={styles.debugInput} placeholder="Item Name" />
+        <TextInput style={styles.debugInput} placeholder="Price" keyboardType="numeric" />
+        <TouchableOpacity style={styles.debugButton} onPress={() => alert('Submit clicked (dummy)')}>
+            <Text>Submit Item</Text>
+        </TouchableOpacity>
+      </View>
     );
   };
   
   const renderChatbot = () => {
-    if (!isChatOpen) return null;
     return (
-      <div style={styles.chatOverlay}>
-        <div style={styles.chatPopup}>
-          <div style={styles.chatHeader}>
-            <h3>Chatbot</h3>
-            <button onClick={() => setChatOpen(false)} style={styles.closeButton}>X</button>
-          </div>
-          <div style={styles.chatMessagesContainer}>
-            {chatMessages.map((msg, index) => (
-              <div key={index} style={styles.chatMessage(msg.role)}>
-                {msg.text}
-              </div>
-            ))}
-            {isBotTyping && <div style={styles.chatMessage('bot')}>...</div>}
-          </div>
-          <form onSubmit={handleChatSubmit} style={styles.chatInputContainer}>
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              placeholder="Enter your prompt..."
-              style={styles.chatInput}
-            />
-            <button type="submit" style={styles.chatSendButton} disabled={isBotTyping}>Send</button>
-          </form>
-        </div>
-      </div>
+      <Modal
+        visible={isChatOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setChatOpen(false)}
+      >
+        <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{flex: 1}}
+        >
+            <View style={styles.chatOverlay}>
+                <View style={styles.chatPopup}>
+                <View style={styles.chatHeader}>
+                    <Text style={styles.chatTitle}>Chatbot</Text>
+                    <TouchableOpacity onPress={() => setChatOpen(false)}>
+                        <Text style={styles.closeButton}>X</Text>
+                    </TouchableOpacity>
+                </View>
+                <ScrollView style={styles.chatMessagesContainer} contentContainerStyle={{ paddingBottom: 10 }}>
+                    {chatMessages.map((msg, index) => (
+                    <View key={index} style={styles.chatMessage(msg.role)}>
+                        <Text style={styles.chatMessageText(msg.role)}>{msg.text}</Text>
+                    </View>
+                    ))}
+                    {isBotTyping && <View style={styles.chatMessage('bot')}><Text style={styles.chatMessageText('bot')}>...</Text></View>}
+                </ScrollView>
+                <View style={styles.chatInputContainer}>
+                    <TextInput
+                        value={chatInput}
+                        onChangeText={setChatInput}
+                        placeholder="Enter your prompt..."
+                        style={styles.chatInput}
+                        onSubmitEditing={handleChatSubmit}
+                        editable={!isBotTyping}
+                    />
+                    <TouchableOpacity onPress={handleChatSubmit} style={styles.chatSendButton} disabled={isBotTyping}>
+                        <Text style={styles.chatSendButtonText}>Send</Text>
+                    </TouchableOpacity>
+                </View>
+                </View>
+            </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    );
+  };
+
+  // --- NEW FUNCTION TO RENDER THE CORRECT FOOTER ---
+  const renderFooter = () => {
+    if (screen === 'Home') {
+      return (
+        <View style={styles.footerArea}>
+          <TouchableOpacity
+            style={styles.homeFooterButton}
+            onPress={() => navigate('Lessons')}
+          >
+            <Text style={styles.homeButtonText}>Video Lessons</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.homeFooterButton}
+            onPress={() => navigate('Bank')}
+          >
+            <Text style={styles.homeButtonText}>Bank</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.homeFooterButton}
+            onPress={() => navigate('Shop', { view: 'pets' })}
+          >
+            <Text style={styles.homeButtonText}>Buy Pets</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    
+    // On all other screens
+    return (
+      <View style={styles.footerArea}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigate('Home')}
+        >
+          <Text style={styles.backButtonText}>Back to Home</Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
   return (
     <PetContext.Provider value={value}>
-      <div style={styles.appContainer}>
-        <div style={styles.headerBar}>
-          <div style={styles.goldDisplay}>Gold: {globalGold}</div>
-          <button onClick={() => setMenuOpen(true)}>☰ Menu</button>
-        </div>
-        <div style={styles.screenContainer}>
-          {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
-          {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
-          {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
-          {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
-          {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
-          {screen === 'Lessons' && <LessonsScreen navigate = {navigate} />}
-          {screen === 'ReceiptUpload' && <ReceiptUploadScreen navigate={navigate} />}
-        </div>
+      <View style={styles.appContainer}>
+        <View style={styles.deviceContainer}>
+          <View style={styles.headerBar}>
+            <Text style={styles.goldDisplay}>Gold: {globalGold}</Text>
+            <TouchableOpacity onPress={() => setMenuOpen(true)}>
+              <Text style={styles.menuButtonText}>☰ Menu</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.contentArea}>
+            {screen === 'Home' && <HomeScreen navigate={navigate} />}
+            {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
+            {screen === 'Shop' && <ShopScreen navigate={navigate} params={params} />}
+            {screen === 'Bank' && <BankScreen navigate={navigate} />}
+            {screen === 'Inventory' && <InventoryScreen navigate={navigate} />}
+            {screen === 'Lessons' && <LessonsScreen navigate={navigate} />}
+            {screen === 'ReceiptUpload' && <ReceiptUploadScreen navigate={navigate} />}
+          </View>
+
+          {/* This one function now handles all footers */}
+          {renderFooter()}
+
+          <TouchableOpacity
+            style={styles.debugToggleButton}
+            onPress={() => setDebugMenuOpen(prev => !prev)}
+          >
+            <Text>Debug ⚙️</Text>
+          </TouchableOpacity>
+          {renderDebugMenu()}
+        </View>
         {renderMenu()}
-        {renderDebugMenu()}
         {renderChatbot()}
-        <button style={styles.debugToggleButton} onClick={() => setDebugMenuOpen(prev => !prev)}>
-          Debug ⚙️
-        </button>
-      </div>
+      </View>
     </PetContext.Provider>
   );
 }
 
-const styles = {
+const styles = StyleSheet.create({
+  // --- STYLES FOR DEVICE AND LAYOUT ---
   appContainer: {
-    fontFamily: 'Arial, sans-serif',
-    height: '100vh',
-    width: '100vw',
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#333',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  deviceContainer: {
+    width: '100%',
+    maxWidth: 420,
+    height: '100%',
+    maxHeight: 840,
+    aspectRatio: 1 / 2,
+    backgroundColor: '#121212',
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: '#555',
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    position: 'relative',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: '#121212',
-    backgroundImage: 'url(https://cdn.mos.cms.futurecdn.net/BfemybeKVXCf9pgX9WCxsc-1200-80.jpg)',
-    backgroundSize: 'cover',
-    backgroundRepeat: 'repeat',
-    backgroundAttachment: 'fixed',
   },
+  contentArea: {
+    flex: 1,
+    width: '100%',
+    position: 'relative',
+    padding: 20,
+  },
+  // --- FOOTER STYLES ---
+  footerArea: {
+    padding: 15,
+    paddingTop: 10,
+    width: '100%',
+    backgroundColor: 'rgba(40, 40, 40, 0.85)',
+    borderTopWidth: 1,
+    borderColor: '#555',
+    gap: 10, // Adds spacing between home buttons
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  backButton: {
+    backgroundColor: '#6c757d',
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center', // Centers text horizontally
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  homeFooterButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center', // Centers text horizontally
+    width: '30%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  homeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  // --- HEADER ---
   headerBar: {
-    padding: '10px 20px',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'android' ? 30 : 50,
     backgroundColor: '#dcdcdc',
-    borderBottom: '1px solid #ddd',
-    display: 'flex',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexShrink: 0,
     zIndex: 10,
-    position: 'sticky',   // stays at top on scroll
-    top: 0,
-    width: '100%',        // span full app width
-    boxSizing: 'border-box'
+    width: '100%',
   },
   goldDisplay: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  screenContainer: {
-    flex: 1,
-    display: 'flex',
-    overflowY: 'auto',
-    position: 'relative',
-    paddingBottom: 60,
-    paddingTop: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
+  menuButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007bff'
   },
-  menuOverlay: {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex', justifyContent: 'center', alignItems: 'center',
-    zIndex: 1000,
-  },
-  menuPopup: {
-    backgroundColor: 'white', padding: '10px', borderRadius: '10px',
-    display: 'flex', flexDirection: 'column', width: '250px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-  },
-  menuItem: {
-    padding: '12px 20px', fontSize: '16px', border: 'none',
-    backgroundColor: 'transparent', cursor: 'pointer', textAlign: 'left',
-    borderBottom: '1px solid #eee',
-  },
+  // --- DEBUG BUTTON (MOVED) ---
   debugToggleButton: {
-    position: 'fixed', bottom: 10, right: 10,
-    padding: '10px 15px', backgroundColor: '#f0f0f0',
-    border: '1px solid #ccc', borderRadius: 8, cursor: 'pointer',
-    fontSize: 14, zIndex: 999, boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 70 : 90, // Align with header padding
+    right: 10,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    zIndex: 999,
   },
   debugPanel: {
-    position: 'fixed', bottom: 50, right: 10, width: 200,
-    backgroundColor: 'white', border: '1px solid #ccc',
-    borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    padding: 10, zIndex: 998, display: 'flex',
-    flexDirection: 'column', gap: 8,
+    position: 'absolute',
+    top: Platform.OS === 'android' ? 120 : 140, // Below debug toggle
+    right: 10,
+    width: 200,
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 998,
   },
-  debugTitle: { margin: '8px 0 0 0', fontSize: 14, fontWeight: 'bold' },
-  debugInput: { padding: '8px 10px', fontSize: 14, border: '1px solid #ccc', borderRadius: 5 },
+  // --- All other modal/debug/chat styles remain unchanged ---
+  debugTitle: {
+    marginVertical: 8,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  debugInput: {
+    padding: 8,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 8,
+  },
   debugButton: {
-    padding: '10px', fontSize: 14, cursor: 'pointer',
-    backgroundColor: '#eee', border: '1px solid #ccc', borderRadius: 5,
+    padding: 10,
+    backgroundColor: '#eee',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuPopup: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    width: 250,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  menuItemText: {
+    fontSize: 16,
+    textAlign: 'left',
   },
   chatOverlay: {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex', justifyContent: 'center', alignItems: 'center',
-    zIndex: 1001,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   chatPopup: {
-    width: '90%', maxWidth: '500px', height: '70%',
-    backgroundColor: 'white', borderRadius: '10px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    display: 'flex', flexDirection: 'column',
+    width: '90%',
+    maxWidth: 500,
+    height: '70%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    display: 'flex',
+    flexDirection: 'column',
   },
   chatHeader: {
-    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    padding: '10px 15px', borderBottom: '1px solid #eee',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  chatTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
   },
   closeButton: {
-    border: 'none', background: 'transparent', fontSize: '18px', cursor: 'pointer',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#888'
   },
   chatMessagesContainer: {
     flex: 1,
-    padding: '15px',
-    overflowY: 'auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 10,
+    padding: 15,
   },
   chatMessage: role => ({
-    padding: '10px 15px',
-    borderRadius: '15px',
+    padding: 10,
+    borderRadius: 15,
     maxWidth: '80%',
     alignSelf: role === 'user' ? 'flex-end' : 'flex-start',
     backgroundColor: role === 'user' ? '#007bff' : '#f1f1f1',
-    color: role === 'user' ? 'white' : 'black',
+    marginBottom: 10,
+  }),
+  chatMessageText: role => ({
+      color: role === 'user' ? 'white' : 'black',
   }),
   chatInputContainer: {
     display: 'flex',
-    padding: '15px',
-    borderTop: '1px solid #eee',
+    flexDirection: 'row',
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#fff',
   },
   chatInput: {
     flex: 1,
-    padding: '10px',
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    marginRight: '10px',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    marginRight: 10,
+    backgroundColor: '#f9f9f9',
   },
   chatSendButton: {
-    padding: '10px 15px',
-    border: 'none',
+    padding: 10,
     backgroundColor: '#007bff',
-    color: 'white',
-    borderRadius: '5px',
-    cursor: 'pointer',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-};
-
+  chatSendButtonText: {
+      color: 'white',
+      fontWeight: 'bold',
+      paddingHorizontal: 5,
+  }
+});
