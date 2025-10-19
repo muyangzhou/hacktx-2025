@@ -14,9 +14,9 @@ const items = [
   { id: '6', name: 'Bow and Arrow', price: 100, type: 'weapon', minLevel: 1 },
   { id: '7', name: 'Bomb', price: 100, type: 'weapon', minLevel: 1 },
   { id: '8', name: 'Hatchet', price: 100, type: 'weapon', minLevel: 1 },
-  { id: '9', name: 'Cool Hat', price: 50, type: 'cosmetic', minLevel: 1 },
-  { id: '10', name: 'Steel Armor', price: 250, type: 'cosmetic', minLevel: 3 },
-  { id: '11', name: 'Magic Ring', price: 1000, type: 'cosmetic', minLevel: 10 },
+  // { id: '9', name: 'Cool Hat', price: 50, type: 'cosmetic', minLevel: 1 },
+  // { id: '10', name: 'Steel Armor', price: 250, type: 'cosmetic', minLevel: 3 },
+  // { id: '11', name: 'Magic Ring', price: 1000, type: 'cosmetic', minLevel: 10 },
 ];
 
 // Define pets available for purchase (with XP properties)

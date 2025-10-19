@@ -40,6 +40,10 @@ app.post('/api/nessie', async (req, res) => {
             return res.status(400).json({ error: "Missing 'prompt' in request body." });
         }
         const response = await getFormattedPurchaseHistory(prompt);
+
+        console.log(response);
+
+        // Send the AI response back to the React client
         res.json({ text: response });
     } catch (error) {
         console.error("Error calling getFormattedPurchaseHistory:", error);
