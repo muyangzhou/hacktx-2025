@@ -1,3 +1,4 @@
+const API_URL = 'http://localhost:3001/api/ai';
 // App.js
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
@@ -204,19 +205,31 @@ const styles = {
   appContainer: {
     fontFamily: 'Arial, sans-serif',
     height: '100vh',
+    width: '100vw',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: '#121212',
+    backgroundImage: 'url(https://cdn.mos.cms.futurecdn.net/BfemybeKVXCf9pgX9WCxsc-1200-80.jpg)',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'repeat',
+    backgroundAttachment: 'fixed',
   },
   headerBar: {
     padding: '10px 20px',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#dcdcdc',
     borderBottom: '1px solid #ddd',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexShrink: 0,
     zIndex: 10,
+    position: 'sticky',   // stays at top on scroll
+    top: 0,
+    width: '100%',        // span full app width
+    boxSizing: 'border-box'
   },
   goldDisplay: {
     fontSize: 16,
@@ -224,9 +237,15 @@ const styles = {
   },
   screenContainer: {
     flex: 1,
+    display: 'flex',
     overflowY: 'auto',
     position: 'relative',
     paddingBottom: 60,
+    paddingTop: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   menuOverlay: {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
