@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
 import BattleScreen from './BattleScreen';
-//import ShopScreen from './ShopScreen';
+import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
 import LessonScreen from './LessonScreen';
@@ -188,6 +188,7 @@ export default function App() {
         <div style={styles.screenContainer}>
           {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
           {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
+          {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
           {screen === 'Learn' && <LessonScreen navigate={navigate} />}
