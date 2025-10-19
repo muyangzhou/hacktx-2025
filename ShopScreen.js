@@ -6,8 +6,9 @@ import { petImages } from './assets/petImages';
 
 const shopItems = {
   pets: [
-    { id: 'p3', name: 'Sparky', price: 100, level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100 },
-    { id: 'p4', name: 'Rocky', price: 150, level: 1, hp: 25, maxHp: 25, attack: 4, xp: 0, xpToNextLevel: 100 },
+    { id: 'p3', name: 'Sparky', price: 100, level: 1, hp: 20, maxHp: 20, attack: 4, xp: 0, xpToNextLevel: 100 },
+    { id: 'p4', name: 'Rocky', price: 150, level: 1, hp: 30, maxHp: 30, attack: 7, xp: 0, xpToNextLevel: 100 },
+    { id: 'p5', name: 'Sunny', price: 200, level: 1, hp: 50, maxHP: 50, attack: 10, xp: 0, xpToNextLevel: 100},
   ],
   items: [],
 };

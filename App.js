@@ -429,6 +429,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
+    backgroundImage: 'url(https://cdn.mos.cms.futurecdn.net/BfemybeKVXCf9pgX9WCxsc-1200-80.jpg)',
+    backgroundSize: 'contain',
+    backgroundRepeat: 'repeat',
+    backgroundAttachment: 'fixed',
   },
   contentArea: {
     flex: 1,
