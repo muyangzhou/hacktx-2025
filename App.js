@@ -12,7 +12,13 @@ export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
-  // ... (all other state and helper functions remain the same) ...
+  const [age, setAge] = usePets(12);
+  const handleSetAge = (newAge) => {
+    setAge(newAge);
+    setSeries(userAge <= 14 ? lessonsData.kids : lessonsData.teens);
+    setCurrentLessonIndex(0);
+    setQuizStage('watching');
+  };
   const [globalGold, setGlobalGold] = useState(150);
   const [pets, setPets] = useState([
     { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
@@ -56,8 +62,8 @@ export default function App() {
   const value = useMemo(() => ({
     pets, selectedPet, selectedPetId, setSelectedPetId,
     updatePet, addPet, setPets,
-    globalGold, updateGlobalGold, addXp,
-  }), [pets, selectedPet, selectedPetId, globalGold]);
+    globalGold, updateGlobalGold, addXp, setAge,
+  }), [pets, selectedPet, selectedPetId, globalGold, age]);
   const [screen, setScreen] = useState('Home');
   const [params, setParams] = useState(null);
   const navigate = (nextScreen, nextParams = null) => {
@@ -141,9 +147,9 @@ export default function App() {
         <input style={styles.debugInput} placeholder="Item Name" />
         <input style={styles.debugInput} placeholder="Price" type="number" />
         <button style={styles.debugButton} onClick={() => alert('Submit clicked (dummy)')}>Submit Item</button>
-        <h5 style={styles.debugTitle}>Set Age</h5>
-        <h5 style={styles.debugTitle}>Current age: {age}</h5>
-        <input style={styles.debugInput} type="number" placeholder="Enter Age" onChange={(e) => handleSetAge(Number(e.target.value))} />
+        <h5 style={styles.debugTitle}>Set User Age</h5>
+        <input id="debug-age-input" style={styles.debugInput} placeholder="Age" type="number"/>
+        <button onClick={() => handleSetAge(Number(document.getElementById('debug-age-input').value))}>Set Age</button>
       </div>
     );
   };

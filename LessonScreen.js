@@ -13,13 +13,6 @@ export default function LessonScreen({ navigate }) {
   const [showCertificate, setShowCertificate] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
 
-  const handleSetAge = (userAge) => {
-    setAge(userAge);
-    setSeries(userAge <= 14 ? lessonsData.kids : lessonsData.teens);
-    setCurrentLessonIndex(0);
-    setQuizStage('watching');
-  };
-
   const currentLesson = series[currentLessonIndex];
 
   const handleWatchVideo = () => {
@@ -61,24 +54,6 @@ export default function LessonScreen({ navigate }) {
   return (
     <div style={styles.container}>
       <h1>📘 Lessons</h1>
-
-      {/* Debug Menu */}
-      <div style={styles.debugSection}>
-        <button onClick={() => setShowDebug(!showDebug)} style={styles.debugButton}>
-          ⚙ Debug Menu
-        </button>
-        {showDebug && (
-          <div>
-            <input
-              type="number"
-              placeholder="Enter Age"
-              onChange={(e) => handleSetAge(Number(e.target.value))}
-            />
-            <p>Current Age: {age ?? 'Not set'}</p>
-          </div>
-        )}
-      </div>
-
       {age && currentLesson && quizStage !== 'done' && (
         <div style={styles.lessonSection}>
           <h3>
