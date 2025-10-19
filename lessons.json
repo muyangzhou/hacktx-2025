@@ -1,0 +1,407 @@
+{
+  "kids": [
+    {
+      "videoId": "J0GVg3-2rUY",
+      "title": "Financial Risk and Reward",
+      "url": "https://www.youtube.com/watch?v=J0GVg3-2rUY",
+      "quiz": [
+        {
+          "question": "What is the common saying about risk and return?",
+          "options": [
+            "The lower the risk, the higher the return",
+            "The higher the risk, the higher the possible return",
+            "Risk and return are not related",
+            "High risk always means you will lose money"
+          ],
+          "answer": "The higher the risk, the higher the possible return"
+        },
+        {
+          "question": "What level of risk does saving in a bank account have?",
+          "options": ["High risk", "Medium risk", "No risk", "It depends on the bank"],
+          "answer": "No risk"
+        },
+        {
+          "question": "What is an important question to ask before making a high-risk investment?",
+          "options": [
+            "Will this make me rich tomorrow?",
+            "Can I afford to lose all my investment?",
+            "Do my friends think this is cool?",
+            "Is the company logo nice?"
+          ],
+          "answer": "Can I afford to lose all my investment?"
+        }
+      ]
+    },
+    {
+      "videoId": "v-mlEQ7KW5Q",
+      "title": "Savings Goals for Kids",
+      "url": "https://www.youtube.com/watch?v=v-mlEQ7KW5Q",
+      "quiz": [
+        {
+          "question": "What is a 'savings goal'?",
+          "options": [
+            "Something you get for free",
+            "A football goal made of money",
+            "Something you want but have to work and save for",
+            "Money you find on the street"
+          ],
+          "answer": "Something you want but have to work and save for"
+        },
+        {
+          "question": "What does it mean for a savings goal to be 'realistic'?",
+          "options": [
+            "It is something you can achieve in a reasonable amount of time",
+            "It is something that is very expensive and will take 50 years",
+            "It is something your parents will buy for you",
+            "It is something you see in a dream"
+          ],
+          "answer": "It is something you can achieve in a reasonable amount of time"
+        }
+      ]
+    },
+    {
+      "videoId": "d-mKp1qZjek",
+      "title": "What is Compound Interest?",
+      "url": "https://www.youtube.com/watch?v=d-mKp1qZjek",
+      "quiz": [
+        {
+          "question": "What is the simple definition of 'compound interest'?",
+          "options": ["Interest that is simple", "Interest on interest", "A type of bank account", "Money you pay to the bank"],
+          "answer": "Interest on interest"
+        },
+        {
+          "question": "Does compound interest make your money grow faster or slower than simple interest?",
+          "options": ["Slower", "Faster", "At the same rate", "It doesn't grow"],
+          "answer": "Faster"
+        }
+      ]
+    },
+    {
+      "videoId": "3I81-P_lwvw",
+      "title": "What is Inflation for Kids",
+      "url": "https://www.youtube.com/watch?v=3I81-P_lwvw",
+      "quiz": [
+        {
+          "question": "What is inflation?",
+          "options": ["When a balloon gets bigger", "When prices of items get bigger or increase", "When you get more pocket money", "When things get cheaper"],
+          "answer": "When prices of items get bigger or increase"
+        },
+        {
+          "question": "If inflation happens, what happens to your money?",
+          "options": ["It buys you more things", "It loses value, and buys you less", "The coins get bigger", "Nothing happens"],
+          "answer": "It loses value, and buys you less"
+        }
+      ]
+    },
+    {
+      "videoId": "QQgOJoZduRc",
+      "title": "How to Help Kids Save Money?",
+      "url": "https://www.youtube.com/watch?v=QQgOJoZduRc",
+      "quiz": [
+        {
+          "question": "What is 'income'?",
+          "options": ["Money that goes out for bills", "Money that comes in from a job", "Money for video games", "Money you find"],
+          "answer": "Money that comes in from a job"
+        },
+        {
+          "question": "What are 'expenses'?",
+          "options": ["Money you get as a gift", "Money that you save", "Money that goes out for things you need and want", "Money that comes from the government"],
+          "answer": "Money that goes out for things you need and want"
+        }
+      ]
+    },
+    {
+      "videoId": "XHwcbRjWEds",
+      "title": "How to Make Money Tips",
+      "url": "https://www.youtube.com/watch?v=XHwcbRjWEds",
+      "quiz": [
+        {
+          "question": "What does it mean to 'earn' money?",
+          "options": ["To find it on the street", "To do work in return for payment", "To get it for your birthday", "To ask your parents for it"],
+          "answer": "To do work in return for payment"
+        },
+        {
+          "question": "What is a 'salary'?",
+          "options": ["A type of vegetable", "Money you get paid per hour", "Working a certain number of hours for a set amount of pay", "Money you only get once a year"],
+          "answer": "Working a certain number of hours for a set amount of pay"
+        }
+      ]
+    },
+    {
+      "videoId": "Z0cbjc54kjI",
+      "title": "What is a Credit Card?",
+      "url": "https://www.youtube.com/watch?v=Z0cbjc54kjI",
+      "quiz": [
+        {
+          "question": "When you use a credit card, are you spending your own money or borrowing money?",
+          "options": ["Your own money", "Your parents' money", "Borrowing money", "It's free money"],
+          "answer": "Borrowing money"
+        },
+        {
+          "question": "What happens if you don't pay the full bill at the end of the month?",
+          "options": ["Nothing happens", "You get more money", "The company charges you interest", "The card stops working forever"],
+          "answer": "The company charges you interest"
+        }
+      ]
+    },
+    {
+      "videoId": "a5Qu1YN43P8",
+      "title": "What is a Payslip?",
+      "url": "https://www.youtube.com/watch?v=a5Qu1YN43P8",
+      "quiz": [
+        {
+          "question": "What is 'gross pay'?",
+          "options": ["The money you actually receive", "The total amount paid BEFORE deductions", "The money the government takes", "An extra payment for travel"],
+          "answer": "The total amount paid BEFORE deductions"
+        },
+        {
+          "question": "What is 'net pay'?",
+          "options": ["The total amount paid before deductions", "The money you have to give back", "The actual amount of money you receive AFTER deductions", "The money you donate to charity"],
+          "answer": "The actual amount of money you receive AFTER deductions"
+        }
+      ]
+    },
+    {
+      "videoId": "VxmTTvGezro",
+      "title": "Bank Accounts",
+      "url": "https://www.youtube.com/watch?v=VxmTTvGezro",
+      "quiz": [
+        {
+          "question": "What are the two main types of bank accounts?",
+          "options": ["Money accounts and card accounts", "Current accounts and savings accounts", "Big accounts and small accounts", "Old accounts and new accounts"],
+          "answer": "Current accounts and savings accounts"
+        },
+        {
+          "question": "What is 'interest' in a savings account?",
+          "options": ["A fee you have to pay", "Money the bank gives you for saving with them", "A type of ATM card", "Something that is not interesting"],
+          "answer": "Money the bank gives you for saving with them"
+        }
+      ]
+    }
+  ],
+  "teens": [
+    {
+      "videoId": "BkwliVwClBE",
+      "title": "Interest - How It Works",
+      "url": "https://www.youtube.com/watch?v=BkwliVwClBE",
+      "quiz": [
+        {
+          "question": "What is the initial amount of money you borrow called?",
+          "options": ["The Interest", "The Principal", "The Return", "The Compound"],
+          "answer": "The Principal"
+        },
+        {
+          "question": "What is the main difference between simple and compound interest?",
+          "options": [
+            "Simple interest is harder to calculate",
+            "Compound interest is only for cars",
+            "Compound interest is paid on the principal plus accrued interest",
+            "Simple interest makes you more money"
+          ],
+          "answer": "Compound interest is paid on the principal plus accrued interest"
+        },
+        {
+          "question": "The 'Rule of 72' helps you estimate how long it will take for an investment to do what?",
+          "options": ["Disappear", "Double in value", "Become shared with friends", "Get taxed"],
+          "answer": "Double in value"
+        }
+      ]
+    },
+    {
+      "videoId": "7looujGJSZk",
+      "title": "Forms of Financial Exchange",
+      "url": "https://www.youtube.com/watch?v=7looujGJSZk",
+      "quiz": [
+        {
+          "question": "What is the key difference between a debit card and a credit card?",
+          "options": [
+            "A debit card is green, a credit card is blue",
+            "A debit card uses your money; a credit card is a loan",
+            "A credit card is free money",
+            "You can only use debit cards online"
+          ],
+          "answer": "A debit card uses your money; a credit card is a loan"
+        },
+        {
+          "question": "What is 'fiat money' (like the US Dollar)?",
+          "options": [
+            "Money made by a car company",
+            "Money that is backed by gold",
+            "Money that represents a promise by the government",
+            "Money that is only used for video games"
+          ],
+          "answer": "Money that represents a promise by the government"
+        }
+      ]
+    },
+    {
+      "videoId": "GwAIu-RA_WA",
+      "title": "Money Basics Introduction",
+      "url": "https://www.youtube.com/watch?v=GwAIu-RA_WA",
+      "quiz": [
+        {
+          "question": "What is a 'nest egg'?",
+          "options": ["A real egg laid by a bird", "Money saved up and tucked away", "A type of financial scam", "A type of loan"],
+          "answer": "Money saved up and tucked away"
+        },
+        {
+          "question": "What is the fancy term for 'paying for stuff'?",
+          "options": ["Money spending", "Financial exchange", "Cash transfer", "Economic activity"],
+          "answer": "Financial exchange"
+        }
+      ]
+    },
+    {
+      "videoId": "Hh-beQj1OK4",
+      "title": "Financial Institutions",
+      "url": "https://www.youtube.com/watch?v=Hh-beQj1OK4",
+      "quiz": [
+        {
+          "question": "What is the main difference between a bank and a credit union?",
+          "options": [
+            "Banks are only for saving, credit unions are for loans",
+            "Banks are for-profit, credit unions are not-for-profit",
+            "Credit unions have higher fees",
+            "Only banks are insured"
+          ],
+          "answer": "Banks are for-profit, credit unions are not-for-profit"
+        },
+        {
+          "question": "What does the FDIC do?",
+          "options": [
+            "It prints money for the government",
+            "It insures bank deposits up to $250,000",
+            "It gives out loans to everyone",
+            "It sets the interest rates for credit cards"
+          ],
+          "answer": "It insures bank deposits up to $250,000"
+        }
+      ]
+    },
+    {
+      "videoId": "OZQQMYfaBT4",
+      "title": "The 50-30-20 Rule",
+      "url": "https://www.youtube.com/watch?v=OZQQMYfaBT4",
+      "quiz": [
+        {
+          "question": "How is your income split in the 50-30-20 rule?",
+          "options": [
+            "50% Wants, 30% Needs, 20% Savings",
+            "50% Needs, 30% Wants, 20% Savings",
+            "50% Savings, 30% Wants, 20% Needs",
+            "50% Needs, 30% Savings, 20% Wants"
+          ],
+          "answer": "50% Needs, 30% Wants, 20% Savings"
+        },
+        {
+          "question": "What is an example of a 'Need'?",
+          "options": ["Video games", "A vacation", "Rent or home payments", "Streaming services"],
+          "answer": "Rent or home payments"
+        }
+      ]
+    },
+    {
+      "videoId": "3HTa9FKSurs",
+      "title": "Introduction to Budgeting",
+      "url": "https://www.youtube.com/watch?v=3HTa9FKSurs",
+      "quiz": [
+        {
+          "question": "What is a 'budget'?",
+          "options": [
+            "A plan to spend all your money on props",
+            "A financial plan to keep your income higher than your expenses",
+            "A type of savings account",
+            "A way to borrow money from friends"
+          ],
+          "answer": "A financial plan to keep your income higher than your expenses"
+        },
+        {
+          "question": "What is one of the best tools for budgeting mentioned in the video?",
+          "options": ["A calculator", "A notebook", "Spreadsheets", "A signed baseball"],
+          "answer": "Spreadsheets"
+        }
+      ]
+    },
+    {
+      "videoId": "85FfwBxIjRk",
+      "title": "Financial Statements",
+      "url": "https://www.youtube.com/watch?v=85FfwBxIjRk",
+      "quiz": [
+        {
+          "question": "What does a 'withdrawal history' on a financial statement show?",
+          "options": [
+            "All the times money has entered your account",
+            "Your starting and ending balance",
+            "All the times money has left your account",
+            "Your account number"
+          ],
+          "answer": "All the times money has left your account"
+        },
+        {
+          "question": "What is a benefit of an 'e-statement'?",
+          "options": [
+            "It costs more money",
+            "It uses more paper",
+            "It is typically free and better for the environment",
+            "It arrives in the mail"
+          ],
+          "answer": "It is typically free and better for the environment"
+        }
+      ]
+    },
+    {
+      "videoId": "3_Q5g1kLOzY",
+      "title": "Fixed and Variable Expenses",
+      "url": "https://www.youtube.com/watch?v=3_Q5g1kLOzY",
+      "quiz": [
+        {
+          "question": "What is a 'fixed expense'?",
+          "options": [
+            "An expense that changes every day",
+            "An expense for fixing things",
+            "An expense that costs about the same amount each time",
+            "An expense you don't have to pay"
+          ],
+          "answer": "An expense that costs about the same amount each time"
+        },
+        {
+          "question": "What is one method the video suggests for budgeting a variable expense?",
+          "options": [
+            "Guess a random number",
+            "Ask a friend how much they spend",
+            "Take the average of what you spent the last few months",
+            "Spend as much as you want"
+          ],
+          "answer": "Take the average of what you spent the last few months"
+        }
+      ]
+    },
+    {
+      "videoId": "WoiNmSK6aWo",
+      "title": "Envelope Budgeting",
+      "url": "https://www.youtube.com/watch?v=WoiNmSK6aWo",
+      "quiz": [
+        {
+          "question": "What is the first step in envelope budgeting?",
+          "options": [
+            "Label different envelopes with specific expenses",
+            "Put all your money in one big envelope",
+            "Buy as many envelopes as possible",
+            "Mail your money to the bank"
+          ],
+          "answer": "Label different envelopes with specific expenses"
+        },
+        {
+          "question": "What happens to the money left over in an envelope at the end of the month?",
+          "options": [
+            "It disappears",
+            "You have to give it back to the bank",
+            "It gets added to your savings envelope",
+            "You have to spend it immediately"
+          ],
+          "answer": "It gets added to your savings envelope"
+        }
+      ]
+    }
+  ]
+}

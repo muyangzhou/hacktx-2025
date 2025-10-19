@@ -6,21 +6,24 @@ import BattleScreen from './BattleScreen';
 import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
-// import { promptAI } from './ai.js'; // <-- DO NOT import this here
+import LessonsScreen from './LessonsScreen'; // Import the new screen
+import lessonsData from './lessons.json'; // Import lesson data
 
 export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
-  // ... (all other state and helper functions remain the same) ...
   const [globalGold, setGlobalGold] = useState(150);
+  const [userAge, setUserAge] = useState(10); // Default age for kids series
   const [pets, setPets] = useState([
-    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 1, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
-    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 2, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
+    // Add lesson progress tracking to each pet's state
+    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
+    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
 
+  
   const updatePet = (id, updater) =>
     setPets(prev =>
       prev.map(p =>
@@ -29,9 +32,14 @@ export default function App() {
           : p
       )
     );
-  const addPet = (pet) => setPets(prev => [...prev, pet]);
+  const addPet = (pet) => {
+    // New pets also get lesson tracking state
+    const newPet = { ...pet, lessonProgress: 0, lessonsCompleted: false };
+    setPets(prev => [...prev, newPet]);
 
+  };
   const updateGlobalGold = (updater) => setGlobalGold(updater);
+  
   const addXp = (id, amount) => {
     let petToUpdate = pets.find(p => p.id === id);
     if (!petToUpdate) return;
@@ -54,6 +62,7 @@ export default function App() {
     }
     updatePet(id, (p) => ({ ...p, xp: newXp, level: newLevel, maxHp: newMaxHp, hp: leveledUp ? newMaxHp : p.hp, attack: newAttack, xpToNextLevel: newXpToNextLevel }));
   };
+
   const handleNewDay = () => {
     if (!selectedPetId) { alert("Please select a pet first."); return; }
     const randomAmount = Math.floor(Math.random() * 201) + 50;
@@ -62,11 +71,28 @@ export default function App() {
     updatePet(selectedPetId, (p) => ({ hp: Math.max(0, p.hp - hpLoss) }));
     alert(`New Day: Found ${randomAmount} gold and lost ${hpLoss} HP!`);
   };
+  
+  // --- New Lesson Functions ---
+  const advanceLesson = (id) => {
+    updatePet(id, p => ({ lessonProgress: p.lessonProgress + 1 }));
+  };
+  
+  const markLessonsCompleted = (id) => {
+      const pet = pets.find(p => p.id === id);
+      if (pet && !pet.lessonsCompleted) {
+          updatePet(id, () => ({ lessonsCompleted: true }));
+          updateGlobalGold(prev => prev + 250); // Big reward for finishing the series!
+          alert("Congratulations! You've completed all lessons and earned 250 gold!");
+      }
+  };
+
   const value = useMemo(() => ({
     pets, selectedPet, selectedPetId, setSelectedPetId,
     updatePet, addPet, setPets,
     globalGold, updateGlobalGold, addXp,
-  }), [pets, selectedPet, selectedPetId, globalGold]);
+    userAge, lessonsData, advanceLesson, markLessonsCompleted, // Expose lesson data and functions
+  }), [pets, selectedPet, selectedPetId, globalGold, userAge]);
+
   const [screen, setScreen] = useState('Home');
   const [params, setParams] = useState(null);
   const navigate = (nextScreen, nextParams = null) => {
@@ -76,38 +102,33 @@ export default function App() {
   };
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDebugMenuOpen, setDebugMenuOpen] = useState(false);
+  const [debugAgeInput, setDebugAgeInput] = useState(userAge.toString());
   const [isChatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
 
-  // --- Updated Chatbot Logic ---
+  useEffect(() => {
+    setDebugAgeInput(userAge.toString());
+  }, [userAge]);
+
   const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() || isBotTyping) return;
-
     const newUserMessage = { role: 'user', text: chatInput };
     setChatMessages(prev => [...prev, newUserMessage]);
-    
     const currentInput = chatInput;
     setChatInput('');
     setIsBotTyping(true);
-
     try {
       // --- This is where you call your server ---
       // (You will need to create this server and deploy it)
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: currentInput }),
       });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
+      if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       // alert("data: " + data.text);
       const botResponse = { role: 'bot', text: data.text }; // Assuming your server returns { text: "..." }
@@ -124,7 +145,6 @@ export default function App() {
     }
   };
 
-  // ... (renderMenu, renderDebugMenu, renderChatbot, and return() remain the same) ...
   const renderMenu = () => {
     if (!menuOpen) return null;
     return (
@@ -140,12 +160,38 @@ export default function App() {
       </div>
     );
   };
+
+  // --- Updated Debug Menu ---
   const renderDebugMenu = () => {
     if (!isDebugMenuOpen) return null;
+
+    const handleSetAge = () => {
+        const ageNum = parseInt(debugAgeInput, 10);
+        if (!isNaN(ageNum) && ageNum > 0) {
+            setUserAge(ageNum);
+            // Reset pet progress when changing age categories to avoid index issues
+            pets.forEach(p => updatePet(p.id, () => ({lessonProgress: 0, lessonsCompleted: false})));
+            alert(`User age set to ${ageNum}. Lesson series updated and progress reset.`);
+        } else {
+            alert("Please enter a valid age.");
+        }
+    };
+
     return (
       <div style={styles.debugPanel}>
         <h4 style={styles.debugTitle}>Debug Panel</h4>
         <button style={styles.debugButton} onClick={handleNewDay}>New Day</button>
+        
+        <h5 style={styles.debugTitle}>Set User Age</h5>
+        <input
+            style={styles.debugInput}
+            placeholder="User Age"
+            type="number"
+            value={debugAgeInput}
+            onChange={(e) => setDebugAgeInput(e.target.value)}
+        />
+        <button style={styles.debugButton} onClick={handleSetAge}>Set Age</button>
+
         <h5 style={styles.debugTitle}>Add Custom Item</h5>
         <input style={styles.debugInput} placeholder="Item Name" />
         <input style={styles.debugInput} placeholder="Price" type="number" />
@@ -153,6 +199,7 @@ export default function App() {
       </div>
     );
   };
+  
   const renderChatbot = () => {
     if (!isChatOpen) return null;
     return (
@@ -184,6 +231,7 @@ export default function App() {
       </div>
     );
   };
+
   return (
     <PetContext.Provider value={value}>
       <div style={styles.appContainer}>
@@ -197,6 +245,7 @@ export default function App() {
           {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
+          {screen === 'Lessons' && <LessonsScreen navigate = {navigate} />}
         </div>
         {renderMenu()}
         {renderDebugMenu()}
@@ -209,7 +258,6 @@ export default function App() {
   );
 }
 
-// ... (styles remain identical) ...
 const styles = {
   appContainer: {
     fontFamily: 'Arial, sans-serif',
@@ -285,7 +333,7 @@ const styles = {
     padding: 10, zIndex: 998, display: 'flex',
     flexDirection: 'column', gap: 8,
   },
-  debugTitle: { margin: 0, fontSize: 14, fontWeight: 'bold' },
+  debugTitle: { margin: '8px 0 0 0', fontSize: 14, fontWeight: 'bold' },
   debugInput: { padding: '8px 10px', fontSize: 14, border: '1px solid #ccc', borderRadius: 5 },
   debugButton: {
     padding: '10px', fontSize: 14, cursor: 'pointer',
@@ -347,3 +395,4 @@ const styles = {
     cursor: 'pointer',
   },
 };
+
