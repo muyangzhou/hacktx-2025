@@ -127,7 +127,8 @@ export default function App() {
     const data2 = await userContext.json();
 
     setChatMessages(prev => [...prev, newUserMessage]);
-    const currentInput = chatInput + " The following contains relevant purchase, deposit, and transfer history: " + data2.text;
+    const currentInput = "Condense your answer into 5 action points and put them into bullet points. \
+    " + chatInput + " The following contains relevant purchase, deposit, and transfer history: " + data2.text;
     setChatInput('');
     setIsBotTyping(true);
     try {
