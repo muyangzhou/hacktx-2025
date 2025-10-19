@@ -3,10 +3,6 @@ const NESSIE_API_URL = 'http://localhost:3001/api/nessie';
 var response = null;
 var data = null;
 
-
-// import { promptAI } from './backend/ai.js';
-// import { getFormattedPurchaseHistory } from './backend/nessie.js';
-
 response = await fetch(NESSIE_API_URL, {
             method: 'POST',
             headers: {
