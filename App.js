@@ -1,3 +1,4 @@
+const API_URL = 'http://localhost:3001/api/ai';
 // App.js
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
@@ -69,15 +70,27 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
-  const handleChatSubmit = (e) => {
+  const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() || isBotTyping) return;
     const newUserMessage = { role: 'user', text: chatInput };
     setChatMessages(prev => [...prev, newUserMessage]);
     setChatInput('');
     setIsBotTyping(true);
+
+    const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: chatInput }), // Send the user's text as JSON
+        });
+
+    const data = await response.json();
+    const aiResponseText = data.text;
+
     setTimeout(() => {
-      const botResponse = { role: 'bot', text: "This is a dummy response from the LLM. I'm ready for a real API!" };
+      const botResponse = { role: 'bot', text: aiResponseText };
       setChatMessages(prev => [...prev, botResponse]);
       setIsBotTyping(false);
     }, 1500);
