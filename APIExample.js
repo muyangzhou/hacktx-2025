@@ -26,29 +26,29 @@ Respond only with a text analysis, not JSON.";
 
 const prompt = `${instructions}\n\n--- TRANSACTION DATA ---\n${formattedTransactionData}`;
 
-// response = await fetch(GENAI_API_URL, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ prompt: prompt }), // Send the user's text as JSON
-//         });
-// data = await response.json();
-
-
-const RECEIPT_IMAGE_PATH = "./my_receipt2.jpg"; 
-const NESSIE_ACCOUNT_ID = "68f426849683f20dd519ff49"; // Get this from your state/context
-
-response = await fetch(PARSE_API_URL, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ 
-        imagePath: RECEIPT_IMAGE_PATH,   // Use the correct key from your server logic
-        nessieAccountId: NESSIE_ACCOUNT_ID // Add the second required key
-    }), 
-});
+response = await fetch(GENAI_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ prompt: prompt }), // Send the user's text as JSON
+        });
 data = await response.json();
+
+
+// const RECEIPT_IMAGE_PATH = "./my_receipt2.jpg"; 
+// const NESSIE_ACCOUNT_ID = "68f426849683f20dd519ff49"; // Get this from your state/context
+
+// response = await fetch(PARSE_API_URL, {
+//     method: 'POST',
+//     headers: {
+//         'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify({ 
+//         imagePath: RECEIPT_IMAGE_PATH,   // Use the correct key from your server logic
+//         nessieAccountId: NESSIE_ACCOUNT_ID // Add the second required key
+//     }), 
+// });
+// data = await response.json();
 
 console.log(data.text);
