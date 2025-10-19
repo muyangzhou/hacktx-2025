@@ -1,21 +1,29 @@
 // ShopScreen.js
 import React from 'react';
 import { usePets } from './App';
+import { petImages, weaponImages } from './assets/petImages'
+import { Image } from 'react-native'
 
 // Expanded item list with minLevel property
 const items = [
-  { id: '1', name: 'Cool Hat', price: 50, type: 'cosmetic', minLevel: 1 },
-  { id: '2', name: 'Power Sword', price: 100, type: 'weapon', minLevel: 1 },
-  { id: '3', name: 'Steel Armor', price: 250, type: 'cosmetic', minLevel: 3 },
-  { id: '4', name: 'Greatsword', price: 500, type: 'weapon', minLevel: 5 },
-  { id: '5', name: 'Magic Ring', price: 1000, type: 'cosmetic', minLevel: 10 },
+  { id: '1', name: 'Sword', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '2', name: 'Pickaxe', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '3', name: 'Shovel', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '4', name: 'War Hammer', price: 500, type: 'weapon', minLevel: 5 },
+  { id: '5', name: 'War Axe', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '6', name: 'Bow and Arrow', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '7', name: 'Bomb', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '8', name: 'Hatchet', price: 100, type: 'weapon', minLevel: 1 },
+  { id: '9', name: 'Cool Hat', price: 50, type: 'cosmetic', minLevel: 1 },
+  { id: '10', name: 'Steel Armor', price: 250, type: 'cosmetic', minLevel: 3 },
+  { id: '11', name: 'Magic Ring', price: 1000, type: 'cosmetic', minLevel: 10 },
 ];
 
 // Define pets available for purchase (with XP properties)
 const buyablePets = [
-  { id: 'p3', name: 'Ignis', level: 1, hp: 25, maxHp: 25, attack: 6, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
-  { id: 'p4', name: 'Terra', level: 1, hp: 30, maxHp: 30, attack: 4, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
-  { id: 'p5', name: 'Aqua', level: 1, hp: 20, maxHp: 20, attack: 7, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p3', name: 'Terra', level: 1, hp: 25, maxHp: 25, attack: 6, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p4', name: 'Diablo', level: 1, hp: 30, maxHp: 30, attack: 4, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p5', name: 'Star', level: 1, hp: 20, maxHp: 20, attack: 7, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
 ];
 
 export default function ShopScreen({ navigate, params }) {
@@ -76,6 +84,11 @@ export default function ShopScreen({ navigate, params }) {
           availableItems.map(it => (
             <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, borderBottom: '1px solid #eee' }}>
               <div>{it.name} (Lvl {it.minLevel}+) — ${it.price}</div>
+              <Image
+              source={weaponImages[it.id]}
+              style={{ width: 5, height: 5 }}
+              accessibilityLabel={it.name}
+              />
               <button onClick={() => buy(it)}>Buy</button>
             </div>
           ))
@@ -92,6 +105,11 @@ export default function ShopScreen({ navigate, params }) {
         {buyablePets.map(pet => (
           <div key={pet.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, borderBottom: '1px solid #eee' }}>
             <div>{pet.name} (Lvl {pet.level}, HP {pet.hp}) — ${pet.price}</div>
+            <Image
+              source={petImages[pet.id]}
+              style={{ width: 64, height: 64 }}
+              accessibilityLabel={pet.name}
+            />
             <button onClick={() => buyPet(pet)}>Buy Pet</button>
           </div>
         ))}

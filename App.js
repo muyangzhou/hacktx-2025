@@ -2,7 +2,7 @@
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
 import BattleScreen from './BattleScreen';
-import ShopScreen from './ShopScreen';
+//import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
 // import { promptAI } from './ai.js'; // <-- DO NOT import this here
@@ -14,8 +14,8 @@ export default function App() {
   // ... (all other state and helper functions remain the same) ...
   const [globalGold, setGlobalGold] = useState(150);
   const [pets, setPets] = useState([
-    { id: '1', name: 'Aegis', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
-    { id: '2', name: 'Nyx',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
   ]);
   const [selectedPetId, setSelectedPetId] = useState('1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
@@ -184,7 +184,7 @@ export default function App() {
         <div style={styles.screenContainer}>
           {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
           {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
-          {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
+          {/*screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />*/}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
         </div>

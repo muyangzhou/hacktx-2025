@@ -2,6 +2,8 @@
 import React, { useMemo } from 'react';
 import { usePets } from './App';
 import items from './items.json'; // if your bundler complains, see note below
+import { petImages, weaponImages } from './assets/petImages'
+import { Image } from 'react-native'
 
 export default function InventoryScreen({ navigate }) {
   // ... (all helper functions remain the same) ...
@@ -59,6 +61,11 @@ export default function InventoryScreen({ navigate }) {
       <div key={it.id} style={styles.row}>
         <div style={styles.rowMain}>
           <div style={styles.itemName}>{it.name}</div>
+          <Image
+            source={weaponImages[it.id]}
+            style={{ width: 20, height: 20 }}
+            accessibilityLabel={it.name}
+            />
           <div style={styles.itemMeta}>
             Slot: {it.slot || it.type || '—'}
             {it.power ? ` • +${it.power} ATK` : ''}
@@ -98,6 +105,11 @@ export default function InventoryScreen({ navigate }) {
       <div style={styles.header}>
         <div>
           <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
+            <Image
+                source={petImages[selectedPet.id]}
+                style={{ width: 64, height: 64 }}
+                accessibilityLabel={selectedPet.name}
+            />
           <div style={{ opacity: 0.7 }}>
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
           </div>

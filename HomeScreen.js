@@ -1,6 +1,8 @@
 // HomeScreen.js
 import React from 'react';
 import { usePets } from './App'; // or from a separate PetContext file
+import { petImages } from './assets/petImages'
+import { Image } from 'react-native'
 
 export default function HomeScreen({ navigate }) {
   const { 
@@ -40,7 +42,7 @@ export default function HomeScreen({ navigate }) {
     );
   }
 
-  const { name, level, hp, maxHp, attack, xp, xpToNextLevel } = selectedPet;
+  const { id, name, level, hp, maxHp, attack, xp, xpToNextLevel } = selectedPet;
 
   return (
     <div style={styles.container}>
@@ -50,6 +52,11 @@ export default function HomeScreen({ navigate }) {
         
         <div style={styles.petInfo}>
           <h2>{name}</h2>
+          <Image
+            source={petImages[id]}
+            style={{ width: 64, height: 64 }}
+            accessibilityLabel={name}
+          />
           <p>Level: {level} ({xp}/{xpToNextLevel} XP)</p>
           <p>HP: {hp}/{maxHp}</p>
           <p>Attack: {attack}</p>
