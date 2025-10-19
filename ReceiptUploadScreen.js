@@ -1,6 +1,8 @@
+// ReceiptUploadScreen.js
 import React, { useState, useEffect, useRef } from 'react';
 import { usePets } from './App';
-import { View, Text, TouchableOpacity, Image, Platform } from 'react-native';
+// --- Import ScrollView ---
+import { View, Text, TouchableOpacity, Image, Platform, StyleSheet, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 const NESSIE_ACCOUNT_ID = "68f426849683f20dd519ff49";
@@ -130,7 +132,9 @@ export default function ReceiptUploadScreen({ navigate }) {
         if (Platform.OS === 'web') {
             return (
                 <>
+                    {/* The input remains hidden */}
                     <input type="file" accept="image/*" onChange={handleFileChangeForWeb} style={{ display: 'none' }} ref={fileInputRef} />
+                    {/* This button is now full-width */}
                     <TouchableOpacity onPress={() => fileInputRef.current.click()} style={styles.uploadButton}>
                         <Text style={styles.buttonText}>Choose Image</Text>
                     </TouchableOpacity>
@@ -139,10 +143,11 @@ export default function ReceiptUploadScreen({ navigate }) {
         } else {
             return (
                 <View style={styles.nativeButtonContainer}>
-                    <TouchableOpacity onPress={takePhoto} style={styles.uploadButton}>
+                    {/* These buttons now use flex: 1 to share the width */}
+                    <TouchableOpacity onPress={takePhoto} style={[styles.uploadButton, { flex: 1 }]}>
                         <Text style={styles.buttonText}>Take Photo</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={pickImageFromLibrary} style={styles.uploadButton}>
+                    <TouchableOpacity onPress={pickImageFromLibrary} style={[styles.uploadButton, { flex: 1 }]}>
                         <Text style={styles.buttonText}>Choose from Library</Text>
                     </TouchableOpacity>
                 </View>
@@ -151,7 +156,8 @@ export default function ReceiptUploadScreen({ navigate }) {
     };
 
     return (
-        <View style={styles.container}>
+        // --- Replaced View with ScrollView ---
+        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
             <View style={styles.card}>
                 <Text style={styles.title}>Upload Receipt</Text>
                 <Text style={styles.paragraph}>Take a photo or upload a receipt to earn gold based on the total purchase amount!</Text>
@@ -170,80 +176,85 @@ export default function ReceiptUploadScreen({ navigate }) {
                 </TouchableOpacity>
 
                 {statusMessage && <Text style={styles.statusText}>{statusMessage}</Text>}
-
-                <TouchableOpacity onPress={() => navigate('Bank')} style={{...styles.button, backgroundColor: '#6c757d'}}>
-                    <Text style={styles.buttonText}>Back to Bank</Text>
-                </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
-const styles = {
-    container: {
-        padding: 20,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+const styles = StyleSheet.create({
+    // --- Added for scrolling ---
+    scrollContainer: {
         width: '100%',
         height: '100%',
+    },
+    container: {
+        padding: 20, // This padding is now on the content *inside* the scrollview
+        display: 'flex',
+        alignItems: 'center',
+        width: '100%',
+        minHeight: '100%', // Ensure it can fill the screen
+        paddingBottom: 40, // Add padding to the bottom
     },
     card: {
         width: '100%',
         maxWidth: 500,
-        padding: '25px',
+        padding: 25,
         backgroundColor: 'rgba(40, 40, 40, 0.85)',
         borderRadius: 10,
-        border: '1px solid #555',
+        borderWidth: 1,
+        borderColor: '#555',
         alignItems: 'center',
     },
     title: {
         color: '#FFFFFF',
-        marginBottom: '15px',
-        fontSize: '24px',
+        marginBottom: 15,
+        fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
     },
     paragraph: {
         color: '#DDDDDD',
-        marginBottom: '25px',
+        marginBottom: 25,
         lineHeight: 22,
-        fontSize: '16px',
+        fontSize: 16,
         textAlign: 'center',
     },
     nativeButtonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between', // Use space-between or space-around
         width: '100%',
-        marginBottom: '20px',
+        marginBottom: 20,
+        gap: 10, // Adds space between the two buttons
     },
     uploadButton: {
-        padding: '12px 20px',
+        // --- MODIFIED: Increased height and set width ---
+        paddingVertical: 15, // Was 12
+        paddingHorizontal: 20,
         backgroundColor: '#007bff',
         borderRadius: 5,
-        cursor: 'pointer',
         alignItems: 'center',
         justifyContent: 'center',
-        marginHorizontal: 5, // For native buttons
-        marginBottom: 10, // For web button
+        marginBottom: 10,
+        width: '100%', // Makes web button full-width
     },
     button: {
-        padding: '12px 25px',
-        fontSize: '16px',
-        cursor: 'pointer',
+        // --- MODIFIED: Increased height ---
+        paddingVertical: 15, // Was 12
+        paddingHorizontal: 25,
+        fontSize: 16,
         marginVertical: 5,
         backgroundColor: '#28a745',
-        borderRadius: '5px',
-        width: '100%',
+        borderRadius: 5,
+        width: '100%', // Already full-width
         alignItems: 'center',
     },
     buttonText: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: '16px',
+        fontSize: 16,
     },
     previewContainer: {
-        marginVertical: '20px',
+        marginVertical: 20,
         width: '100%',
     },
     previewImage: {
@@ -251,16 +262,16 @@ const styles = {
         height: undefined,
         aspectRatio: 4 / 5,
         borderRadius: 5,
-        border: '1px solid #555',
-        marginTop: '10px',
+        borderWidth: 1,
+        borderColor: '#555',
+        marginTop: 10,
         resizeMode: 'contain',
     },
     statusText: {
-        marginTop: '20px',
+        marginTop: 20,
         color: '#FFFFFF',
         fontWeight: 'bold',
-        fontSize: '16px',
+        fontSize: 16,
         textAlign: 'center',
     }
-};
-
+});
