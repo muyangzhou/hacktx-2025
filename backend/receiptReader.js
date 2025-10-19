@@ -181,9 +181,11 @@ export async function postPurchaseToNessie(accountId, purchaseData) {
  */
 async function main() {
   // Pass the absolute path created earlier
+  console.log("Starting receipt processing...");
   const parsedData = await parseReceiptWithGemini(RECEIPT_IMAGE_PATH_ABSOLUTE);
   
   await postPurchaseToNessie(NESSIE_ACCOUNT_ID, parsedData);
+  console.log("Receipt processing completed.");
 }
 
 // Run the main function

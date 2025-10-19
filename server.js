@@ -1,35 +1,32 @@
-// server.js (Requires 'express', 'cors', and 'body-parser' to be installed)
-import 'dotenv/config'; // Load environment variables (like API Key)
+// server.js
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { promptAI } from './backend/ai.js'; // Your original AI function
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
+import { promptAI } from './backend/ai.js';
 import { getFormattedPurchaseHistory } from './backend/nessie.js';
-import { parseReceiptWithGemini } from './backend/receiptReader.js';
-import { postPurchaseToNessie } from './backend/receiptReader.js';
+import { parseReceiptWithGemini, postPurchaseToNessie } from './backend/receiptReader.js';
+
+// Proof-of-life log to confirm the correct file is running
+console.log(`-----\nServer.js version: ${new Date().toLocaleTimeString()}\n-----`);
 
 const app = express();
-const PORT = 3001; // Choose a port different from your React app (usually 3000)
+const PORT = 3001;
 
-// Middleware
-app.use(cors()); // Allows your React app (on port 3000) to talk to this server (on port 3001)
-app.use(express.json()); // To parse JSON bodies
+app.use(cors());
+app.use(express.json({ limit: '10mb' })); // Increased limit for base64 images
 
-// Secure AI Endpoint
+// ... (other API endpoints remain the same) ...
 app.post('/api/ai', async (req, res) => {
     try {
-        // The user's input (prompt) is sent in the body of the request
         const { prompt } = req.body;
-
         if (!prompt) {
             return res.status(400).json({ error: "Missing 'prompt' in request body." });
         }
-
-        // Call the secure AI utility function
         const response = await promptAI(prompt);
-
-        // Send the AI response back to the React client
         res.json({ text: response });
-
     } catch (error) {
         console.error("Error calling promptAI:", error);
         res.status(500).json({ error: "Internal server error during AI processing." });
@@ -38,91 +35,75 @@ app.post('/api/ai', async (req, res) => {
 
 app.post('/api/nessie', async (req, res) => {
     try {
-        // The user's input (prompt) is sent in the body of the request
         const { prompt } = req.body;
-
         if (!prompt) {
             return res.status(400).json({ error: "Missing 'prompt' in request body." });
         }
-
-        // Call the secure AI utility function
         const response = await getFormattedPurchaseHistory(prompt);
-
-        // Send the AI response back to the React client
         res.json({ text: response });
-
     } catch (error) {
-        console.error("Error calling promptAI:", error);
-        res.status(500).json({ error: "Internal server error during AI processing." });
+        console.error("Error calling getFormattedPurchaseHistory:", error);
+        res.status(500).json({ error: "Internal server error during Nessie processing." });
     }
 });
 
-// app.post('/api/parseReceipt', async (req, res) => {
-//     try {
-//         // The user's input (prompt) is sent in the body of the request
-//         const { prompt } = req.body;
-
-//         if (!prompt) {
-//             return res.status(400).json({ error: "Missing 'prompt' in request body." });
-//         }
-
-//         // Call the secure AI utility function
-//         const response = await parseReceiptWithGemini(prompt);
-
-//         // Send the AI response back to the React client
-//         res.json({ text: response });
-
-//     } catch (error) {
-//         console.error("Error calling promptAI:", error);
-//         res.status(500).json({ error: "Internal server error during AI processing." });
-//     }
-// });
-
 
 app.post('/api/process-receipt', async (req, res) => {
-    // 1. Get required data from the request body
-    const { imagePath, nessieAccountId } = req.body;
+    const { imageData, nessieAccountId } = req.body;
 
-    // 2. Validate input
-    if (!imagePath || !nessieAccountId) {
-        return res.status(400).json({ 
-            success: false, 
-            message: "Missing 'imagePath' or 'nessieAccountId' in request body." 
-        });
+    if (!imageData || !nessieAccountId) {
+        return res.status(400).json({ success: false, message: "Missing imageData or nessieAccountId." });
     }
 
+    let tempImagePath = '';
     try {
-        // Step 1: Parse the receipt with the secure Gemini service
-        const parsedData = await parseReceiptWithGemini(imagePath);
-        
-        if (!parsedData) {
-            return res.status(500).json({ 
-                success: false, 
-                message: "Failed to parse receipt with Gemini." 
-            });
+        console.log("Backend: Received request to process receipt.");
+        const imageBuffer = Buffer.from(imageData, 'base64');
+        tempImagePath = path.join(os.tmpdir(), `receipt-${Date.now()}.png`);
+        await fs.writeFile(tempImagePath, imageBuffer);
+        console.log(`Backend: Image saved temporarily to ${tempImagePath}`);
+
+        // This function correctly returns an object now.
+        const geminiObject = await parseReceiptWithGemini(tempImagePath);
+        console.log("Backend: Received object from Gemini:", geminiObject);
+
+        if (!geminiObject || typeof geminiObject !== 'object') {
+             throw new Error("Failed to parse receipt with Gemini. Response was not a valid object.");
         }
-
-        // Step 2: Post the purchase to Nessie
-        const nessieResult = await postPurchaseToNessie(nessieAccountId, parsedData);
-
-        // 3. Send the final result back to the frontend
+        
+        // The redundant JSON.parse is confirmed to be removed.
+        
+        const nessieResult = await postPurchaseToNessie(nessieAccountId, geminiObject);
+        console.log("Backend: Received from Nessie:", nessieResult);
+        
+        console.log("Backend: Sending successful response to frontend.");
         res.json({
             success: true,
-            message: "Receipt processed and purchase posted successfully.",
-            geminiData: parsedData,
+            message: "Receipt processed successfully.",
+            geminiData: geminiObject, // Send the object
             nessieResponse: nessieResult
         });
 
     } catch (error) {
-        console.error("Critical error in /api/process-receipt:", error);
+        console.error("Backend: CRITICAL ERROR in /api/process-receipt:", error);
         res.status(500).json({ 
             success: false, 
-            message: "An internal server error occurred during processing." 
+            message: "An internal server error occurred.",
+            error: error.message
         });
+    } finally {
+        if (tempImagePath) {
+            try {
+                await fs.unlink(tempImagePath);
+                console.log(`Backend: Cleaned up temporary file: ${tempImagePath}`);
+            } catch (cleanupError) {
+                console.error("Backend: Error cleaning up temp file:", cleanupError);
+            }
+        }
     }
 });
-
 
 app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
 });
+

@@ -8,6 +8,7 @@ import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
 import LessonsScreen from './LessonsScreen'; // Import the new screen
 import lessonsData from './lessons.json'; // Import lesson data
+import ReceiptUploadScreen from './ReceiptUploadScreen'; // Import the new receipt upload screen
 
 export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
@@ -246,6 +247,7 @@ export default function App() {
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
           {screen === 'Lessons' && <LessonsScreen navigate = {navigate} />}
+          {screen === 'ReceiptUpload' && <ReceiptUploadScreen navigate={navigate} />} 
         </div>
         {renderMenu()}
         {renderDebugMenu()}
