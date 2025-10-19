@@ -105,11 +105,13 @@ export default function InventoryScreen({ navigate }) {
       <div style={styles.header}>
         <div>
           <h2 style={{ margin: 0 }}>{selectedPet.name}</h2>
+          <div style={styles.petImageContainer}>
             <Image
                 source={petImages[selectedPet.id]}
                 style={{ width: 64, height: 64 }}
                 accessibilityLabel={selectedPet.name}
             />
+            </div>
           <div style={{ opacity: 0.7 }}>
             Lvl {selectedPet.level} • HP {selectedPet.hp ?? selectedPet.health}/{selectedPet.maxHp ?? 100} • ATK {selectedPet.attack ?? 5}
           </div>
@@ -200,9 +202,13 @@ const styles = {
   },
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
+    backgroundColor: '#a2a2a2',
+    borderRadius: 10,
+    textAlign: 'center',
+    gap: 16,
   },
   button: {
     padding: '8px 12px',
@@ -214,6 +220,7 @@ const styles = {
     borderRadius: 10,
     padding: 16,
     marginBottom: 16,
+    backgroundColor: '#a2a2a2',
   },
   cardTitle: {
     margin: '0 0 8px 0',
@@ -263,5 +270,11 @@ const styles = {
     border: '1px solid #f0f0f0',
     borderRadius: 5,
     padding: '0 4px',
+  },
+  petImageContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: '10px 0',
   },
 };
