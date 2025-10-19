@@ -1,8 +1,8 @@
 // HomeScreen.js
 import React from 'react';
-import { usePets } from './App'; // or from a separate PetContext file
-import { petImages } from './assets/petImages'
-import { Image } from 'react-native'
+import { usePets } from './App'; // from context
+import { petImages } from './assets/petImages';
+import { Image } from 'react-native';
 
 export default function HomeScreen({ navigate }) {
   const { 
@@ -12,8 +12,6 @@ export default function HomeScreen({ navigate }) {
     setSelectedPetId, 
     addPet,
   } = usePets();
-
-  // "handleNewDay" logic has been moved to App.js
 
   const currentIndex = pets.findIndex(p => p.id === selectedPetId);
 
@@ -32,7 +30,6 @@ export default function HomeScreen({ navigate }) {
     addPet({ id, name: 'New Pet', level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100 });
   };
 
-
   if (!selectedPet) {
     return (
       <div style={{ padding: 20 }}>
@@ -46,7 +43,6 @@ export default function HomeScreen({ navigate }) {
 
   return (
     <div style={styles.container}>
-      {/* --- Pet Browser and Action Hub --- */}
       <div style={styles.petBrowser}>
         <button onClick={handlePrevious} style={styles.arrowButton}>{'<'}</button>
         
@@ -60,30 +56,25 @@ export default function HomeScreen({ navigate }) {
           <p>Level: {level} ({xp}/{xpToNextLevel} XP)</p>
           <p>HP: {hp}/{maxHp}</p>
           <p>Attack: {attack}</p>
-          
-          {/* --- Pet-Specific Action Buttons --- */}
+
           <div style={styles.petActions}>
             <button style={styles.actionButton} onClick={() => navigate('Battle')}>Battle</button>
             <button style={styles.actionButton} onClick={() => navigate('Inventory')}>Inventory</button>
-            {/* --- "Item Shop" button removed --- */}
           </div>
         </div>
 
         <button onClick={handleNext} style={styles.arrowButton}>{'>'}</button>
       </div>
 
-      {/* --- "New Day" / Debug Section Removed --- */}
-
-      {/* --- Global Action Buttons --- */}
       <div style={styles.globalActions}>
         <button style={styles.globalButton} onClick={() => navigate('Bank')}>Bank</button>
         <button style={styles.globalButton} onClick={() => navigate('Shop', { view: 'pets' })}>Buy Pets</button>
+        <button style={styles.globalButton} onClick={() => navigate('Lesson')}>Learn</button>
       </div>
     </div>
   );
 }
 
-// --- Styles for this screen ---
 const styles = {
   container: {
     padding: 20,
@@ -126,17 +117,16 @@ const styles = {
     padding: '8px 12px',
     fontSize: 14,
   },
-  // --- debugSection and debugButton styles removed ---
   globalActions: {
-    marginTop: 'auto', // Pushes this section to the bottom
+    marginTop: 'auto',
     paddingTop: 20,
     display: 'flex',
     gap: 10,
   },
   globalButton: {
-    flex: 1, // Make buttons share space
+    flex: 1,
     padding: '12px',
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
 };

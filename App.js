@@ -5,6 +5,7 @@ import BattleScreen from './BattleScreen';
 //import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
+import LessonScreen from './LessonScreen';
 // import { promptAI } from './ai.js'; // <-- DO NOT import this here
 
 export const PetContext = createContext(null);
@@ -140,6 +141,9 @@ export default function App() {
         <input style={styles.debugInput} placeholder="Item Name" />
         <input style={styles.debugInput} placeholder="Price" type="number" />
         <button style={styles.debugButton} onClick={() => alert('Submit clicked (dummy)')}>Submit Item</button>
+        <h5 style={styles.debugTitle}>Set Age</h5>
+        <h5 style={styles.debugTitle}>Current age: {age}</h5>
+        <input style={styles.debugInput} type="number" placeholder="Enter Age" onChange={(e) => handleSetAge(Number(e.target.value))} />
       </div>
     );
   };
@@ -184,9 +188,9 @@ export default function App() {
         <div style={styles.screenContainer}>
           {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
           {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
-          {/*screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />*/}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
+          {screen === 'Learn' && <LessonScreen navigate={navigate} />}
         </div>
         {renderMenu()}
         {renderDebugMenu()}
