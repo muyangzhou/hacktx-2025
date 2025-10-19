@@ -7,14 +7,14 @@ export const petImages = {
 }
 
 export const weaponImages = {
-    1: require('./kenney_cursor-pixel-pack/Tiles/tile_0107.png'),
-    2: require('./kenney_cursor-pixel-pack/Tiles/tile_0108.png'),
-    3: require('./kenney_cursor-pixel-pack/Tiles/tile_0109.png'),
-    4: require('./kenney_cursor-pixel-pack/Tiles/tile_0110.png'),
-    5: require('./kenney_cursor-pixel-pack/Tiles/tile_0111.png'),
-    6: require('./kenney_cursor-pixel-pack/Tiles/tile_0126.png'),
-    7: require('./kenney_cursor-pixel-pack/Tiles/tile_0127.png'),
-    8: require('./kenney_cursor-pixel-pack/Tiles/tile_0131.png'),
+    'w-sword': require('./kenney_cursor-pixel-pack/Tiles/tile_0107.png'),
+    'w-pickaxe': require('./kenney_cursor-pixel-pack/Tiles/tile_0108.png'),
+    'w-shovel': require('./kenney_cursor-pixel-pack/Tiles/tile_0109.png'),
+    'w-war-hammer': require('./kenney_cursor-pixel-pack/Tiles/tile_0110.png'),
+    'w-war-axe': require('./kenney_cursor-pixel-pack/Tiles/tile_0111.png'),
+    'w-bow-and-arrow': require('./kenney_cursor-pixel-pack/Tiles/tile_0126.png'),
+    'w-bomb': require('./kenney_cursor-pixel-pack/Tiles/tile_0127.png'),
+    'w-hatchet': require('./kenney_cursor-pixel-pack/Tiles/tile_0131.png'),
 };
 
 export const cosmeticImages = {
