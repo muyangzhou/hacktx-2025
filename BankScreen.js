@@ -13,8 +13,11 @@ const BankScreen = ({ navigate }) => {
   const [accountLinked, setAccountLinked] = useState(false);
   const [savings, setSavings] = useState('');
   const [view, setView] = useState('main'); // 'main' or 'history'
-  const [transactions, setTransactions] = useState(null); // To store fetched transactions
-  const [analysisScore, setAnalysisScore] = useState(null); // To store AI analysis
+  // transactions can be null, a string ('Loading...'), or an array
+  const [transactions, setTransactions] = useState(null); 
+  // analysisScore will now be an object { score: number|null, reasoning: string } 
+  // or a string ('Analyzing...') for the initial loading state
+  const [analysisScore, setAnalysisScore] = useState(null); 
 
   // Get global currency state and updater from context
   const { globalGold, updateGlobalGold } = usePets();
@@ -47,39 +50,42 @@ const BankScreen = ({ navigate }) => {
   const handleFetchTransactions = async () => {
     // 1. Setup UI for loading
     setTransactions("Loading transactions...");
-    setAnalysisScore("Analyzing..."); // Set loading state for AI score immediately
+    setAnalysisScore("Analyzing..."); 
     setView('history');
     
     let fetchedTransactions = null;
+    let analysisResult = { score: null, reasoning: "Error: AI analysis failed to process." };
 
     try {
       // 2. Fetch transactions from the bank API
       let response = await fetch(NESSIE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: DUMMY_ACCOUNT_ID }), // Use the dummy ID
+        body: JSON.stringify({ prompt: DUMMY_ACCOUNT_ID }), 
       });
 
       if (!response.ok) throw new Error('Failed to fetch transactions');
 
       let data = await response.json();
-      fetchedTransactions = data.text; // Store the fetched data
-      setTransactions(fetchedTransactions); // Set the transactions state
+      fetchedTransactions = data.text; 
+      setTransactions(fetchedTransactions); 
       
-      // Check if we have an array to analyze (or just proceed with what we got)
-      if (!fetchedTransactions || typeof fetchedTransactions === 'string' || fetchedTransactions.length === 0) {
-          setAnalysisScore("No valid transactions to analyze.");
+      // Check if we have a valid array to analyze 
+      if (!Array.isArray(fetchedTransactions) || fetchedTransactions.length === 0) {
+          analysisResult.reasoning = "No transactions found to analyze.";
+          setAnalysisScore(analysisResult);
           return;
       }
       
       // 3. Format the transaction data for the AI
       const formattedTransactionData = JSON.stringify(fetchedTransactions, null, 2);
 
+      // UPDATED PROMPT: Ask for reasoning as a JSON array of strings
       const instructions = "Analyze the following list of transactions in terms of \
-how healthy or unhealthy this list of transastions is. Give the overall list \
+how healthy or unhealthy this list of transactions is. Give the overall list \
 of transactions a score value from 0 - 100, where higher scores represent healthy \
 transaction histories and lower scores represent unhealthy transaction histories. \
-Respond only with a text analysis, not JSON.";
+Respond ONLY with a JSON string containing two fields: 'score' (an integer from 0-100) and 'reasoning' (a JSON array of strings, where each string is a separate point of analysis).";
 
       const prompt = `${instructions}\n\n--- TRANSACTION DATA ---\n${formattedTransactionData}`;
 
@@ -93,13 +99,39 @@ Respond only with a text analysis, not JSON.";
       if (!response.ok) throw new Error('Failed to fetch AI analysis');
 
       data = await response.json();
-      setAnalysisScore(data.text); // Set the final AI analysis score
+      const aiRawText = data.text;
+
+      // 5. Robustly parse the JSON response
+      try {
+          // Attempt to clean up common AI output markdown
+          const jsonString = aiRawText.replace(/```json|```/g, '').trim();
+          const parsedData = JSON.parse(jsonString);
+          
+          if (typeof parsedData.score === 'number' && Array.isArray(parsedData.reasoning)) {
+               analysisResult = { 
+                   score: Math.max(0, Math.min(100, Math.round(parsedData.score))), // Clamp score
+                   // Ensure reasoning is an array of strings
+                   reasoning: parsedData.reasoning.map(String)
+               };
+          } else {
+               throw new Error("Parsed JSON structure is invalid or fields are missing/wrong type.");
+          }
+      } catch (e) {
+          console.error("Failed to parse AI response as JSON:", e);
+          // Fallback: use the raw text as the reasoning if parsing fails
+          analysisResult.reasoning = [`AI response could not be parsed. Raw Output: ${aiRawText}`];
+          analysisResult.score = null;
+      }
+      
+      setAnalysisScore(analysisResult); 
 
     } catch (error) {
       console.error("Error in fetch or analysis:", error);
-      // Update states to reflect the error
+      // Update states to reflect the error, ensuring analysisScore is an object for consistent rendering
       setTransactions(fetchedTransactions || "Error loading transactions. Check server status.");
-      setAnalysisScore("Error: Could not get AI score.");
+      analysisResult.reasoning = [`Error: ${error.message || "Could not complete bank or AI call."}`];
+      analysisResult.score = null;
+      setAnalysisScore(analysisResult);
     }
   };
 
@@ -115,7 +147,7 @@ Respond only with a text analysis, not JSON.";
       height: '100%',
       boxSizing: 'border-box',
       backgroundColor: '#a2a2a2',
-      width: '100%', // Ensure it takes full width for flex
+      width: '100%', 
       overflowY: 'auto',
     },
     title: {
@@ -133,7 +165,7 @@ Respond only with a text analysis, not JSON.";
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      maxWidth: '600px', // Increased width for better table view
+      maxWidth: '600px', 
     },
     input: {
       height: '40px',
@@ -168,12 +200,19 @@ Respond only with a text analysis, not JSON.";
         backgroundColor: '#f9f9f9',
         border: '1px solid #ddd',
         borderRadius: '5px',
-        whiteSpace: 'pre-wrap', // Preserve formatting of the AI's response
+        whiteSpace: 'pre-wrap', 
         width: '100%',
     },
     loadingText: {
         fontWeight: 'bold',
         color: '#007bff',
+    },
+    // NEW: Style for the big score number
+    bigScore: {
+        fontSize: '48px',
+        fontWeight: '900',
+        margin: '10px 0',
+        lineHeight: '1',
     },
     // New styles for the table
     transactionTable: {
@@ -267,7 +306,6 @@ Respond only with a text analysis, not JSON.";
                     ))
                 ) : (
                     <tr>
-                    {/* Updated colSpan from 4 to 3 */}
                     <td colSpan="3" style={styles.tableCell}>No transactions found.</td>
                     </tr>
                 )}
@@ -279,10 +317,39 @@ Respond only with a text analysis, not JSON.";
         {/* The analysis box is now always present when in history view */}
         {analysisScore && (
             <div style={styles.analysisBox}>
-            <h4>AI Transaction Analysis:</h4>
-            <p style={analysisScore === "Analyzing..." ? styles.loadingText : {}}>
-                {analysisScore === "Analyzing..." ? "Analyzing your financial health..." : analysisScore}
-            </p>
+            
+            {/* Display logic based on the state type (string for loading/initial, object for result) */}
+            {typeof analysisScore === "string" ? (
+                // Loading State
+                <>
+                    <h4>AI Transaction Analysis:</h4>
+                    <p style={styles.loadingText}>Analyzing your financial health...</p>
+                </>
+            ) : (
+                // Result State
+                <>
+                <h4>Your Financial Health Score:</h4>
+                {analysisScore.score !== null ? (
+                    <div style={{
+                        ...styles.bigScore,
+                        color: analysisScore.score >= 75 ? 'green' : analysisScore.score >= 50 ? 'orange' : 'red' 
+                    }}>
+                        {analysisScore.score} / 100
+                    </div>
+                ) : (
+                    // Display error if score is null
+                    <p style={{color: 'red', fontWeight: 'bold'}}>Analysis Error</p>
+                )}
+                
+                <strong>Key Reasonings:</strong>
+                <ul style={{ paddingLeft: '20px', marginTop: '5px' }}>
+                    {/* Map the array of reasoning strings to list items */}
+                    {analysisScore.reasoning.map((point, index) => (
+                        <li key={index} style={{ marginBottom: '5px' }}>{point}</li>
+                    ))}
+                </ul>
+                </>
+            )}
             </div>
         )}
         </div>
