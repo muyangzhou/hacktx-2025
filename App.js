@@ -87,7 +87,7 @@ export default function App() {
     try {
       // --- This is where you call your server ---
       // (You will need to create this server and deploy it)
-      const response = await fetch('https://your-server-url.com/api/chat', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,11 +100,11 @@ export default function App() {
       }
 
       const data = await response.json();
-      alert("data: " + data.text);
+      // alert("data: " + data.text);
       const botResponse = { role: 'bot', text: data.text }; // Assuming your server returns { text: "..." }
       setChatMessages(prev => [...prev, botResponse]);
       // --- End API Call ---
-      console.log(await promptAI("<prompt>"));
+      // console.log(await promptAI("<prompt>"));
 
     } catch (error) {
       console.error("Error fetching AI response:", error);
