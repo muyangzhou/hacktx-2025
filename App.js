@@ -20,7 +20,7 @@ export default function App() {
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
-  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...updater(p) } : p)));
+  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) } : p)));
   const addPet = (pet) => setPets(prev => [...prev, pet]);
   const updateGlobalGold = (updater) => setGlobalGold(updater);
   const addXp = (id, amount) => {
