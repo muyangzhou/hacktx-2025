@@ -122,7 +122,7 @@ export default function InventoryScreen({ navigate }) {
         <h3 style={styles.cardTitle}>Equipped</h3>
         <div style={styles.equippedRow}>
           <EquippedSlot label="Weapon" slot="weapon" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('weapon')} />
-          <EquippedSlot label="Cosmetic" slot="cosmetic" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('cosmetic')} />
+          {/* {<EquippedSlot label="Cosmetic" slot="cosmetic" selectedPet={selectedPet} inventory={inventory} onUnequip={() => unequipSlot('cosmetic')} />} */}
         </div>
       </div>
 
@@ -151,14 +151,14 @@ export default function InventoryScreen({ navigate }) {
           )}
         </div>
 
-        <div style={{ ...styles.groupTitle, marginTop: 16 }}>COSMETICS</div>
+        {/* {<div style={{ ...styles.groupTitle, marginTop: 16 }}>COSMETICS</div>
         <div style={styles.scrollBox}>
           {(groupedCatalog.cosmetic || []).length === 0 ? (
             <div style={{ opacity: 0.7, padding: 8 }}>No cosmetics in catalog.</div>
           ) : (
             (groupedCatalog.cosmetic || []).map(it => renderItemRow(it, 'catalog'))
           )}
-        </div>
+        </div>} */}
       </div>
     </div>
   );
@@ -173,12 +173,17 @@ function EquippedSlot({ label, slot, selectedPet, inventory, onUnequip }) {
       <div style={styles.equippedLabel}>{label}</div>
       {item ? (
         <>
+        
+          <Image
+            source={weaponImages[item.id]}
+            style={{ width: 20, height: 20 }}
+            accessibilityLabel={item.name}
+            />
           <div style={styles.itemName}>{item.name}</div>
           <div style={styles.itemMeta}>
             Slot: {item.slot || item.type}
             {item.power ? ` • +${item.power} ATK` : ''}
           </div>
-          <button style={styles.smallButton} onClick={onUnequip}>Unequip</button>
         </>
       ) : (
         <div style={{ opacity: 0.6 }}>Nothing equipped</div>
@@ -221,20 +226,22 @@ const styles = {
     padding: 16,
     marginBottom: 16,
     backgroundColor: '#a2a2a2',
+    minHeight: 150,
   },
   cardTitle: {
     margin: '0 0 8px 0',
   },
   equippedRow: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
     gap: 12,
+    alignItems: 'stretch',
   },
   equippedSlot: {
     border: '1px solid #eee',
     borderRadius: 8,
     padding: 12,
-    minHeight: 92,
+    minHeight: 80,
   },
   equippedLabel: {
     fontWeight: 'bold',
@@ -265,7 +272,7 @@ const styles = {
   groupTitle: { fontWeight: 'bold', margin: '8px 0' },
   // --- Updated Style ---
   scrollBox: {
-    maxHeight: '100px', // Changed from 200px
+    maxHeight: '150px', // Changed from 200px
     overflowY: 'auto',
     border: '1px solid #f0f0f0',
     borderRadius: 5,
