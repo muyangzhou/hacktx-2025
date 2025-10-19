@@ -28,7 +28,6 @@ export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
-  // ... (All your existing state and functions remain unchanged) ...
   const [globalGold, setGlobalGold] = useState(150);
   const [userAge, setUserAge] = useState(10);
   const [pets, setPets] = useState([
@@ -108,11 +107,20 @@ export default function App() {
 
   const [screen, setScreen] = useState('Home');
   const [params, setParams] = useState(null);
+  
+  // --- STATE FOR BANK SCREEN'S INTERNAL VIEW ---
+  const [bankView, setBankView] = useState('main');
+
   const navigate = (nextScreen, nextParams = null) => {
     setScreen(nextScreen);
     setParams(nextParams);
     setMenuOpen(false);
+    // If we navigate to Bank, always reset its internal view to main
+    if (nextScreen === 'Bank') {
+      setBankView('main');
+    }
   };
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isDebugMenuOpen, setDebugMenuOpen] = useState(false);
   const [debugAgeInput, setDebugAgeInput] = useState(userAge.toString());
@@ -144,6 +152,7 @@ export default function App() {
         console.warn("Could not fetch user context", e);
     }
 
+
     setChatMessages(prev => [...prev, newUserMessage]);
     const currentInput = "Condense your answer into 5 action points and put them into bullet points. \
     " + chatInput + " The following contains relevant purchase, deposit, and transfer history: " + data2.text;
@@ -168,8 +177,8 @@ export default function App() {
     }
   };
 
-  // ... (renderMenu, renderDebugMenu, renderChatbot functions are unchanged) ...
   const renderMenu = () => {
+    // ... (function unchanged) ...
     return (
       <Modal
         visible={menuOpen}
@@ -196,6 +205,7 @@ export default function App() {
   };
 
   const renderDebugMenu = () => {
+    // ... (function unchanged) ...
     if (!isDebugMenuOpen) return null;
 
     const handleSetAge = () => {
@@ -239,6 +249,7 @@ export default function App() {
   };
   
   const renderChatbot = () => {
+    // ... (function unchanged) ...
     return (
       <Modal
         visible={isChatOpen}
@@ -286,7 +297,6 @@ export default function App() {
     );
   };
 
-  // --- NEW FUNCTION TO RENDER THE CORRECT FOOTER ---
   const renderFooter = () => {
     if (screen === 'Home') {
       return (
@@ -312,16 +322,47 @@ export default function App() {
         </View>
       );
     }
+
+    // All other screens
+    let leftSlot = <View style={styles.footerSlot} />;
+    let rightSlot = <View style={styles.footerSlot} />;
+
+    if (screen === 'ReceiptUpload') {
+      rightSlot = (
+        <View style={styles.footerSlot}>
+          <TouchableOpacity
+            style={styles.footerActionButton}
+            onPress={() => navigate('Bank')} // This will also reset bankView to 'main'
+          >
+            <Text style={styles.footerButtonText}>Back to Bank</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    if (screen === 'Bank' && bankView === 'history') {
+      rightSlot = (
+        <View style={styles.footerSlot}>
+          <TouchableOpacity
+            style={styles.footerActionButton}
+            onPress={() => setBankView('main')}
+          >
+            <Text style={styles.footerButtonText}>Back to Bank</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
     
-    // On all other screens
     return (
       <View style={styles.footerArea}>
+        {leftSlot}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigate('Home')}
         >
-          <Text style={styles.backButtonText}>Back to Home</Text>
+          <Text style={styles.backButtonText}>Home</Text>
         </TouchableOpacity>
+        {rightSlot}
       </View>
     );
   };
@@ -341,13 +382,12 @@ export default function App() {
             {screen === 'Home' && <HomeScreen navigate={navigate} />}
             {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
             {screen === 'Shop' && <ShopScreen navigate={navigate} params={params} />}
-            {screen === 'Bank' && <BankScreen navigate={navigate} />}
+            {screen === 'Bank' && <BankScreen navigate={navigate} bankView={bankView} setBankView={setBankView} />}
             {screen === 'Inventory' && <InventoryScreen navigate={navigate} />}
             {screen === 'Lessons' && <LessonsScreen navigate={navigate} />}
             {screen === 'ReceiptUpload' && <ReceiptUploadScreen navigate={navigate} />}
           </View>
 
-          {/* This one function now handles all footers */}
           {renderFooter()}
 
           <TouchableOpacity
@@ -398,23 +438,23 @@ const styles = StyleSheet.create({
   },
   // --- FOOTER STYLES ---
   footerArea: {
-    padding: 15,
-    paddingTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     width: '100%',
     backgroundColor: 'rgba(40, 40, 40, 0.85)',
     borderTopWidth: 1,
     borderColor: '#555',
-    gap: 10, // Adds spacing between home buttons
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   backButton: {
     backgroundColor: '#6c757d',
-    padding: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     borderRadius: 5,
-    alignItems: 'center', // Centers text horizontally
-    width: '30%',
-    alignItems: 'center',
+    alignItems: 'center', 
+    width: '32%',
     justifyContent: 'center',
   },
   backButtonText: {
@@ -425,14 +465,37 @@ const styles = StyleSheet.create({
   },
   homeFooterButton: {
     backgroundColor: '#007bff',
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 5,
     borderRadius: 5,
-    alignItems: 'center', // Centers text horizontally
-    width: '30%',
-    alignItems: 'center',
+    alignItems: 'center', 
+    width: '32%',
     justifyContent: 'center',
+    height: 48, // Give a fixed height to match back button
   },
   homeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  footerSlot: {
+    width: '32%',
+    height: 48, // Give a fixed height
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footerActionButton: {
+    backgroundColor: '#007bff', // Match home buttons
+    paddingVertical: 10,
+    paddingHorizontal: 5,
+    borderRadius: 5,
+    alignItems: 'center', 
+    justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  footerButtonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
