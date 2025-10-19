@@ -206,7 +206,7 @@ const BankScreen = ({ navigate }) => {
       
       <TouchableOpacity 
         style={{...styles.button, backgroundColor: '#6c757d', marginTop: 20}} 
-        onClick={() => view === 'main' ? navigate('Home') : setView('main')}>
+        onPress={() => view === 'main' ? navigate('Home') : setView('main')}>
         <Text style={styles.buttonText}>{view === 'main' ? 'Back to Home' : 'Back to Bank'}</Text>
       </TouchableOpacity>
     </View>
