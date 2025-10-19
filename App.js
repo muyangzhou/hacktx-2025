@@ -192,7 +192,7 @@ export default function App() {
             <TouchableWithoutFeedback>
               <View style={styles.menuPopup}>
                 <TouchableOpacity style={styles.menuItem} onPress={() => { setChatOpen(true); setMenuOpen(false); }}>
-                  <Text style={styles.menuItemText}>Chatbot</Text>
+                  <Text style={styles.menuItemText}>Ask Capi</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.menuItem} onPress={() => { alert('Settings clicked!'); setMenuOpen(false); }}>
                   <Text style={styles.menuItemText}>Settings</Text>
@@ -265,7 +265,7 @@ export default function App() {
             <View style={styles.chatOverlay}>
                 <View style={styles.chatPopup}>
                 <View style={styles.chatHeader}>
-                    <Text style={styles.chatTitle}>Chatbot</Text>
+                    <Text style={styles.chatTitle}>Capi</Text>
                     <TouchableOpacity onPress={() => setChatOpen(false)}>
                         <Text style={styles.closeButton}>X</Text>
                     </TouchableOpacity>
@@ -617,6 +617,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     display: 'flex',
     flexDirection: 'column',
+    height: 500,
+    width: 350,
   },
   chatHeader: {
     display: 'flex',
