@@ -21,9 +21,9 @@ const items = [
 
 // Define pets available for purchase (with XP properties)
 const buyablePets = [
-  { id: 'p3', name: 'Terra', level: 1, hp: 25, maxHp: 25, attack: 6, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
-  { id: 'p4', name: 'Diablo', level: 1, hp: 30, maxHp: 30, attack: 4, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
-  { id: 'p5', name: 'Star', level: 1, hp: 20, maxHp: 20, attack: 7, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p3', name: 'Terra', level: 1, hp: 25, maxHp: 25, attack: 5, price: 200, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p4', name: 'Diablo', level: 1, hp: 30, maxHp: 30, attack: 10, price: 300, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
+  { id: 'p5', name: 'Star', level: 1, hp: 20, maxHp: 20, attack: 15, price: 400, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null} },
 ];
 
 export default function ShopScreen({ navigate, params }) {
@@ -40,16 +40,22 @@ export default function ShopScreen({ navigate, params }) {
   const view = params?.view || 'items';
 
   const buy = (item) => {
-    if (globalGold >= item.price) {
-      updateGlobalGold(prev => prev - item.price);
-      updatePet(selectedPet.id, (p) => ({ 
-        inventory: [...(p.inventory||[]), item]
-      }));
-      alert(`${selectedPet.name} bought ${item.name}!`);
-    } else {
-      alert(`Not enough gold! Need ${item.price - globalGold} more.`);
+    const alreadyOwned = (selectedPet?.inventory || []).some(i => i.id === item.id);
+    if (alreadyOwned) {
+      alert(`${item.name} is already owned.`);
+      return;
     }
-  };
+    if (globalGold < item.price) {
+      alert(`Not enough gold! Need ${item.price - globalGold} more.`);
+      return;
+    }
+    updateGlobalGold(prev => prev - item.price);
+    updatePet(selectedPet.id, (p) => ({
+      ...p,
+      inventory: [ ...(p.inventory || []), item ],
+    }));
+    alert(`${selectedPet.name} bought ${item.name}!`);
+    };
 
   const buyPet = (pet) => {
     if (pets.find(p => p.id === pet.id)) {
@@ -98,24 +104,49 @@ export default function ShopScreen({ navigate, params }) {
   };
 
   // --- Render Pet Shop ---
-  const renderPetShop = () => {
-    return (
-      <>
-        <h4 style={styles.petShop}>Buy New Pets</h4>
-        {buyablePets.map(pet => (
+const renderPetShop = () => {
+  return (
+    <>
+      <h4 style={styles.petShop}>Buy New Pets</h4>
+      {buyablePets.map(pet => {
+        const owned = pets.some(p => p.id === pet.id);
+        const canAfford = globalGold >= pet.price;
+        const disabled = owned || !canAfford;
+
+        const tooltip = owned
+          ? 'Already owned'
+          : canAfford
+            ? 'Buy this pet'
+            : `Need ${pet.price - globalGold} more gold`;
+
+        return (
           <div key={pet.id} style={styles.petCard}>
-            <div>{pet.name} (Lvl {pet.level}, HP {pet.hp}) — ${pet.price}</div>
+            <div>
+              {pet.name} (Lvl {pet.level}, HP {pet.hp}) — ${pet.price}
+            </div>
             <Image
               source={petImages[pet.id]}
               style={{ width: 64, height: 64 }}
               accessibilityLabel={pet.name}
             />
-            <button onClick={() => buyPet(pet)}>Buy Pet</button>
+            <button
+              onClick={() => buyPet(pet)}
+              disabled={disabled}
+              title={tooltip}
+              style={{
+                opacity: disabled ? 0.6 : 1,
+                cursor: disabled ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {owned ? 'Owned' : `Buy (${pet.price})`}
+            </button>
           </div>
-        ))}
-      </>
-    );
-  };
+        );
+      })}
+    </>
+  );
+};
+
 
   return (
     <div style={styles.shopContainer}>

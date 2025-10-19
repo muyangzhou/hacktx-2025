@@ -7,7 +7,7 @@ import { Image } from 'react-native'
 
 export default function InventoryScreen({ navigate }) {
   // ... (all helper functions remain the same) ...
-  const { selectedPet, updatePet } = usePets();
+  const { selectedPet, updatePet, globalGold, updateGlobalGold } = usePets();
   const inventory = selectedPet?.inventory ?? [];
   const groupedCatalog = useMemo(() => {
     const groups = {};
@@ -18,15 +18,23 @@ export default function InventoryScreen({ navigate }) {
     }
     return groups;
   }, []);
-  const addToInventory = (catalogItem) => {
-    updatePet(selectedPet.id, (p) => {
-      const inv = Array.isArray(p.inventory) ? p.inventory.slice() : [];
-      if (!inv.find(i => i.id === catalogItem.id)) {
-        inv.push({ ...catalogItem, ownedAt: Date.now() });
-      }
-      return { inventory: inv };
-    });
-  };
+    const addToInventory = (catalogItem) => {
+    const price = Number(catalogItem.price ?? 0);
+    // already owned?
+    const alreadyOwned = (selectedPet?.inventory || []).some(i => i.id === catalogItem.id);
+    if (alreadyOwned) return alert(`${catalogItem.name} is already in your inventory.`);
+    // funds check
+    if (globalGold < price) {
+        return alert(`Not enough gold! Need ${price - globalGold} more.`);
+    }
+    // pay then add to pet inventory
+    updateGlobalGold(prev => prev - price);
+    updatePet(selectedPet.id, (p) => ({
+        ...p,
+        inventory: [ ...(p.inventory || []), { ...catalogItem, ownedAt: Date.now() } ]
+    }));
+    alert(`${selectedPet.name} bought ${catalogItem.name}!`);
+    };
   const removeFromInventory = (itemId) => {
     updatePet(selectedPet.id, (p) => {
       const inv = (p.inventory || []).filter(i => i.id !== itemId);
@@ -83,7 +91,20 @@ export default function InventoryScreen({ navigate }) {
               <button style={{ ...styles.smallButton, marginLeft: 8 }} onClick={() => removeFromInventory(it.id)}>Remove</button>
             </>
           ) : (
-            <button style={styles.smallButton} onClick={() => addToInventory(it)}>Add</button>
+            <button
+            style={styles.smallButton}
+            onClick={() => addToInventory(it)}
+            disabled={(selectedPet?.inventory || []).some(x => x.id === it.id) || (globalGold < (Number(it.price) || 0))}
+            title={
+                (selectedPet?.inventory || []).some(x => x.id === it.id)
+                ? 'Already owned'
+                : (globalGold < (Number(it.price) || 0))
+                    ? `Need ${Number(it.price) - globalGold} more gold`
+                    : 'Add to inventory'
+            }
+            >
+            { (selectedPet?.inventory || []).some(x => x.id === it.id) ? 'Owned' : `Add ($${it.price ?? 0})` }
+            </button>
           )}
         </div>
       </div>

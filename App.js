@@ -17,18 +17,22 @@ export default function App() {
   const [userAge, setUserAge] = useState(10); // Default age for kids series
   const [pets, setPets] = useState([
     // Add lesson progress tracking to each pet's state
-    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
-    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
+    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 1, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
+    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 2, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
-  
-  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) } : p)));
-  const addPet = (pet) => {
-    // New pets also get lesson tracking state
-    const newPet = { ...pet, lessonProgress: 0, lessonsCompleted: false };
-    setPets(prev => [...prev, newPet]);
-  };
+
+  const updatePet = (id, updater) =>
+    setPets(prev =>
+      prev.map(p =>
+        p.id === id
+          ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) }
+          : p
+      )
+    );
+  const addPet = (pet) => setPets(prev => [...prev, pet]);
+
   const updateGlobalGold = (updater) => setGlobalGold(updater);
   
   const addXp = (id, amount) => {
@@ -112,15 +116,21 @@ export default function App() {
     setChatInput('');
     setIsBotTyping(true);
     try {
-      const response = await fetch('https://your-server-url.com/api/chat', {
+      // --- This is where you call your server ---
+      // (You will need to create this server and deploy it)
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: currentInput }),
       });
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-      const botResponse = { role: 'bot', text: data.text };
+      // alert("data: " + data.text);
+      const botResponse = { role: 'bot', text: data.text }; // Assuming your server returns { text: "..." }
       setChatMessages(prev => [...prev, botResponse]);
+      // --- End API Call ---
+      // console.log(await promptAI("<prompt>"));
+
     } catch (error) {
       console.error("Error fetching AI response:", error);
       const errorResponse = { role: 'bot', text: "Sorry, I'm having trouble connecting right now." };
