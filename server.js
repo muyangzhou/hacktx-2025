@@ -8,9 +8,7 @@ import path from 'path';
 import { promptAI } from './backend/ai.js';
 import { getFormattedPurchaseHistory } from './backend/nessie.js';
 import { parseReceiptWithGemini, postPurchaseToNessie } from './backend/receiptReader.js';
-
-// Proof-of-life log to confirm the correct file is running
-console.log(`-----\nServer.js version: ${new Date().toLocaleTimeString()}\n-----`);
+import { getGeneralHistory } from './backend/nessie2.js';
 
 const app = express();
 const PORT = 3001;
@@ -50,6 +48,51 @@ app.post('/api/nessie', async (req, res) => {
         res.status(500).json({ error: "Internal server error during Nessie processing." });
     }
 });
+
+app.post('/api/nessie2', async (req, res) => {
+    try {
+        // The user's input (prompt) is sent in the body of the request
+        const { prompt } = req.body;
+
+        if (!prompt) {
+            return res.status(400).json({ error: "Missing 'prompt' in request body." });
+        }
+
+        // Call the secure AI utility function
+        const response = await getGeneralHistory(prompt);
+
+        console.log(response);
+
+        // Send the AI response back to the React client
+        res.json({ text: response });
+
+    } catch (error) {
+        console.error("Error calling promptAI:", error);
+        res.status(500).json({ error: "Internal server error during AI processing." });
+    }
+});
+
+
+// app.post('/api/parseReceipt', async (req, res) => {
+//     try {
+//         // The user's input (prompt) is sent in the body of the request
+//         const { prompt } = req.body;
+
+//         if (!prompt) {
+//             return res.status(400).json({ error: "Missing 'prompt' in request body." });
+//         }
+
+//         // Call the secure AI utility function
+//         const response = await parseReceiptWithGemini(prompt);
+
+//         // Send the AI response back to the React client
+//         res.json({ text: response });
+
+//     } catch (error) {
+//         console.error("Error calling promptAI:", error);
+//         res.status(500).json({ error: "Internal server error during AI processing." });
+//     }
+// });
 
 
 app.post('/api/process-receipt', async (req, res) => {
