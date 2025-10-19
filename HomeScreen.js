@@ -57,8 +57,9 @@ export default function HomeScreen({ navigate }) {
           <View style={styles.petImageContainer}>
             <Image
               source={petImages[id]}
-              style={{ width: 64, height: 64 }}
+              style={{ width: 150, height: 150 }}
               accessibilityLabel={name}
+              resizeMode="contain"
             />
           </View>
           <Text style={styles.petStatText}>Level: {level} ({xp}/{xpToNextLevel} XP)</Text>
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
   arrowButton: {
     paddingHorizontal: 15,
     paddingVertical: 10,
-    backgroundColor: '#eee',
+    backgroundColor: '#9a9a9aff',
     borderRadius: 5,
     alignSelf: 'stretch',
     justifyContent: 'center'
@@ -149,6 +150,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     backgroundColor: '#007bff',
     borderRadius: 5,
+    width: 100,
   },
   buttonText: {
       color: '#FFFFFF',
