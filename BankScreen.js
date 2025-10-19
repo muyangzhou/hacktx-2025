@@ -1,43 +1,26 @@
 // BankScreen.js
 import React, { useState } from 'react';
-import { usePets } from './App'; // Import the context
+import { usePets } from './App';
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 
-// Define the API URLs needed for the bank and AI services
 const NESSIE_API_URL = 'http://localhost:3001/api/nessie';
-const GENAI_API_URL = 'http://localhost:3001/api/ai'; // Reusing App.js's API_URL structure
-
-// A hardcoded account ID for the demo/sample code
+const GENAI_API_URL = 'http://localhost:3001/api/ai';
 const DUMMY_ACCOUNT_ID = '68f426849683f20dd519ff49';
 
 const BankScreen = ({ navigate }) => {
-  const [accountLinked, setAccountLinked] = useState(false);
+  const [accountLinked, setAccountLinked] = useState(true); // Default to true for styling
   const [savings, setSavings] = useState('');
   const [view, setView] = useState('main'); // 'main' or 'history'
-  // transactions can be null, a string ('Loading...'), or an array
   const [transactions, setTransactions] = useState(null); 
-  // analysisScore will now be an object { score: number|null, reasoning: string } 
-  // or a string ('Analyzing...') for the initial loading state
   const [analysisScore, setAnalysisScore] = useState(null); 
 
-  // Get global currency state and updater from context
   const { globalGold, updateGlobalGold } = usePets();
-
-  // --- Handlers for Bank Linking and Savings ---
-  const handleLinkAccount = () => {
-    alert('Success! Bank Account Linked! (Using a dummy ID for now)');
-    setAccountLinked(true);
-    // In a real app, you'd store the actual account ID here
-  };
 
   const handleAddSavings = () => {
     const savedAmount = parseFloat(savings);
     if (!isNaN(savedAmount) && savedAmount > 0) {
-      // Reward logic: 1 currency for every $10 saved
       const newCurrency = Math.floor(savedAmount / 10);
-      
-      // Update the global currency state
       updateGlobalGold(prevGold => prevGold + newCurrency);
-      
       alert(`Savings Added! You earned ${newCurrency} in-game currency!`);
       setSavings('');
     } else {
@@ -45,19 +28,15 @@ const BankScreen = ({ navigate }) => {
     }
   };
 
-  // --- Handlers for Transaction History and AI Analysis ---
-
   const handleFetchTransactions = async () => {
-    // 1. Setup UI for loading
+    setView('history');
     setTransactions("Loading transactions...");
     setAnalysisScore("Analyzing..."); 
-    setView('history');
     
     let fetchedTransactions = null;
-    let analysisResult = { score: null, reasoning: "Error: AI analysis failed to process." };
+    let analysisResult = { score: null, reasoning: ["Error: AI analysis failed to process."] };
 
     try {
-      // 2. Fetch transactions from the bank API
       let response = await fetch(NESSIE_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,26 +49,17 @@ const BankScreen = ({ navigate }) => {
       fetchedTransactions = data.text; 
       setTransactions(fetchedTransactions); 
       
-      // Check if we have a valid array to analyze 
       if (!Array.isArray(fetchedTransactions) || fetchedTransactions.length === 0) {
-          analysisResult.reasoning = "No transactions found to analyze.";
+          analysisResult.reasoning = ["No transactions found to analyze."];
           setAnalysisScore(analysisResult);
           return;
       }
       
-      // 3. Format the transaction data for the AI
       const formattedTransactionData = JSON.stringify(fetchedTransactions, null, 2);
 
-      // UPDATED PROMPT: Ask for reasoning as a JSON array of strings
-      const instructions = "Analyze the following list of transactions in terms of \
-how healthy or unhealthy this list of transactions is. Give the overall list \
-of transactions a score value from 0 - 100, where higher scores represent healthy \
-transaction histories and lower scores represent unhealthy transaction histories. \
-Respond ONLY with a JSON string containing two fields: 'score' (an integer from 0-100) and 'reasoning' (a JSON array of strings, where each string is a separate point of analysis).";
-
+      const instructions = "Analyze the following list of transactions in terms of how healthy or unhealthy this list of transactions is. Give the overall list a score value from 0 - 100, where higher scores represent healthy transaction histories and lower scores represent unhealthy transaction histories. Respond ONLY with a JSON string containing two fields: 'score' (an integer from 0-100) and 'reasoning' (a JSON array of strings, where each string is a separate point of analysis).";
       const prompt = `${instructions}\n\n--- TRANSACTION DATA ---\n${formattedTransactionData}`;
 
-      // 4. Call the Generative AI API
       response = await fetch(GENAI_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,282 +70,240 @@ Respond ONLY with a JSON string containing two fields: 'score' (an integer from 
 
       data = await response.json();
       const aiRawText = data.text;
-
-      // 5. Robustly parse the JSON response
-      try {
-          // Attempt to clean up common AI output markdown
-          const jsonString = aiRawText.replace(/```json|```/g, '').trim();
-          const parsedData = JSON.parse(jsonString);
-          
-          if (typeof parsedData.score === 'number' && Array.isArray(parsedData.reasoning)) {
-               analysisResult = { 
-                   score: Math.max(0, Math.min(100, Math.round(parsedData.score))), // Clamp score
-                   // Ensure reasoning is an array of strings
-                   reasoning: parsedData.reasoning.map(String)
-               };
-          } else {
-               throw new Error("Parsed JSON structure is invalid or fields are missing/wrong type.");
-          }
-      } catch (e) {
-          console.error("Failed to parse AI response as JSON:", e);
-          // Fallback: use the raw text as the reasoning if parsing fails
-          analysisResult.reasoning = [`AI response could not be parsed. Raw Output: ${aiRawText}`];
-          analysisResult.score = null;
+      
+      const jsonString = aiRawText.replace(/```json|```/g, '').trim();
+      const parsedData = JSON.parse(jsonString);
+      
+      if (typeof parsedData.score === 'number' && Array.isArray(parsedData.reasoning)) {
+            analysisResult = { 
+                score: Math.max(0, Math.min(100, Math.round(parsedData.score))),
+                reasoning: parsedData.reasoning.map(String)
+            };
+      } else {
+            throw new Error("Parsed JSON structure is invalid.");
       }
       
       setAnalysisScore(analysisResult); 
 
     } catch (error) {
       console.error("Error in fetch or analysis:", error);
-      // Update states to reflect the error, ensuring analysisScore is an object for consistent rendering
-      setTransactions(fetchedTransactions || "Error loading transactions. Check server status.");
-      analysisResult.reasoning = [`Error: ${error.message || "Could not complete bank or AI call."}`];
+      setTransactions(fetchedTransactions || "Error loading transactions.");
+      analysisResult.reasoning = [`Error: ${error.message || "Could not complete API call."}`];
       analysisResult.score = null;
       setAnalysisScore(analysisResult);
     }
   };
 
-  // --- Styles ---
-  const styles = {
-    // ... (Your existing styles) ...
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif',
-      height: '100%',
-      boxSizing: 'border-box',
-      backgroundColor: '#a2a2a2',
-      width: '100%', 
-      overflowY: 'auto',
-    },
-    title: {
-      fontSize: '22px',
-      fontWeight: 'bold',
-      marginBottom: '20px',
-    },
-    linkedText: {
-      fontSize: '18px',
-      color: 'green',
-      marginBottom: '20px',
-    },
-    form: {
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      maxWidth: '600px', 
-    },
-    input: {
-      height: '40px',
-      borderColor: 'gray',
-      borderWidth: '1px',
-      borderStyle: 'solid',
-      borderRadius: '5px',
-      width: '80%',
-      padding: '0 10px',
-      marginBottom: '20px',
-      marginTop: '20px',
-      boxSizing: 'border-box'
-    },
-    button: {
-        padding: '10px 20px',
-        fontSize: '16px',
-        cursor: 'pointer',
-        margin: '5px'
-    },
-    historyContainer: {
-        width: '100%',
-        padding: '10px',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        marginTop: '20px',
-        overflowX: 'auto',
-    },
-    analysisBox: {
-        marginTop: '20px',
-        padding: '15px',
-        backgroundColor: '#f9f9f9',
-        border: '1px solid #ddd',
-        borderRadius: '5px',
-        whiteSpace: 'pre-wrap', 
-        width: '100%',
-    },
-    loadingText: {
-        fontWeight: 'bold',
-        color: '#007bff',
-    },
-    // NEW: Style for the big score number
-    bigScore: {
-        fontSize: '48px',
-        fontWeight: '900',
-        margin: '10px 0',
-        lineHeight: '1',
-    },
-    // New styles for the table
-    transactionTable: {
-        width: '100%',
-        borderCollapse: 'collapse',
-        textAlign: 'left',
-        fontSize: '14px',
-    },
-    tableHeader: {
-        backgroundColor: '#f2f2f2',
-    },
-    tableCell: {
-        padding: '10px',
-        border: '1px solid #ddd',
-    }
-  };
-
-  // --- Render Functions ---
-
   const renderMainView = () => (
-    <div style={styles.form}>
-      {/* Existing Savings Feature */}
-      <p style={styles.linkedText}>Account Linked!</p>
-      <p>Total In-Game Currency: **{globalGold}**</p>
-      <input
-        style={styles.input}
-        placeholder="Enter amount you saved"
-        type="number"
-        value={savings}
-        onChange={(e) => setSavings(e.target.value)}
-      />
-      <button style={styles.button} onClick={handleAddSavings}>Add Savings & Get Reward</button>
-      
-      <hr style={{width: '80%', margin: '20px 0'}} />
-
-      {/* New Transaction History Button */}
-      <button style={{...styles.button, backgroundColor: '#4CAF50', color: 'white'}} 
-              onClick={handleFetchTransactions}>
-        View Transactions & Get AI Score
-      </button>
-    </div>
+    <>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Savings Account</Text>
+        <Text style={styles.paragraph}>Current Gold: {globalGold}</Text>
+         <TextInput
+            style={styles.input}
+            placeholder="Enter amount to deposit"
+            placeholderTextColor="#999"
+            keyboardType="numeric"
+            value={savings}
+            onChangeText={setSavings}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleAddSavings}>
+            <Text style={styles.buttonText}>Add Savings & Get Reward</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Account Actions</Text>
+        <TouchableOpacity style={{...styles.button, backgroundColor: '#4CAF50'}} onPress={handleFetchTransactions}>
+            <Text style={styles.buttonText}>View Transactions & Get AI Score</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{...styles.button, backgroundColor: '#007bff'}} onPress={() => navigate('ReceiptUpload')}>
+            <Text style={styles.buttonText}>Upload Receipt for Gold</Text>
+        </TouchableOpacity>
+      </View>
+    </>
   );
 
   const renderHistoryView = () => {
-    // Check if transactions is a valid array before trying to sort
-    const isArray = Array.isArray(transactions) && transactions.length > 0;
-    
-    let sortedTransactions = [];
-
-    if (isArray) {
-        // Create a copy and sort it by date (newest first/descending)
-        sortedTransactions = [...transactions].sort((a, b) => {
-            const dateA = new Date(a.purchase_date || a.transaction_date);
-            const dateB = new Date(b.purchase_date || b.transaction_date);
-            // Sort in descending order (dateB - dateA)
-            return dateB - dateA; 
-        }).slice(0, 10); // Show only the first 10 sorted transactions
-    }
+    const isArray = Array.isArray(transactions);
+    const sortedTransactions = isArray ? [...transactions].sort((a, b) => new Date(b.purchase_date || b.transaction_date) - new Date(a.purchase_date || a.transaction_date)).slice(0, 10) : [];
 
     return (
-        <div style={styles.form}>
-        <div style={styles.historyContainer}>
-            <h3>Transaction History (Dummy Data)</h3>
-            
-            {/* Check if transactions is a string (e.g., loading or error message) */}
-            {typeof transactions === 'string' ? (
-            <p>{transactions}</p>
-            ) : (
-            <table style={styles.transactionTable}>
-                <thead style={styles.tableHeader}>
-                <tr>
-                    <th style={styles.tableCell}>Date</th>
-                    <th style={styles.tableCell}>Description</th>
-                    <th style={styles.tableCell}>Amount ($)</th>
-                </tr>
-                </thead>
-                <tbody>
-                {/* Mapping over the sorted transactions */}
-                {isArray ? (
-                    sortedTransactions.map((t, index) => ( 
-                    <tr key={index}>
-                        <td style={styles.tableCell}>{t.purchase_date || t.transaction_date || 'N/A'}</td>
-                        <td style={styles.tableCell}>{t.description || t.type || 'Unknown'}</td>
-                        <td style={styles.tableCell}>
-                            {new Intl.NumberFormat('en-US', { 
-                                style: 'currency', 
-                                currency: 'USD' 
-                            }).format(t.amount)}
-                        </td>
-                    </tr>
-                    ))
+        <>
+            <View style={styles.card}>
+                <Text style={styles.cardTitle}>Recent Transactions</Text>
+                {typeof transactions === 'string' ? (
+                    <Text style={styles.paragraph}>{transactions}</Text>
                 ) : (
-                    <tr>
-                    <td colSpan="3" style={styles.tableCell}>No transactions found.</td>
-                    </tr>
+                    <View style={styles.table}>
+                        <View style={styles.tableHeader}>
+                            <Text style={[styles.tableCell, { flex: 2, fontWeight: 'bold' }]}>Date</Text>
+                            <Text style={[styles.tableCell, { flex: 4, fontWeight: 'bold' }]}>Description</Text>
+                            <Text style={[styles.tableCell, { flex: 2, fontWeight: 'bold', textAlign: 'right' }]}>Amount</Text>
+                        </View>
+                        {isArray && sortedTransactions.length > 0 ? (
+                            sortedTransactions.map((t, index) => (
+                                <View key={index} style={styles.tableRow}>
+                                    <Text style={[styles.tableCell, { flex: 2 }]}>{t.purchase_date || t.transaction_date || 'N/A'}</Text>
+                                    <Text style={[styles.tableCell, { flex: 4 }]}>{t.description || t.type || 'Unknown'}</Text>
+                                    <Text style={[styles.tableCell, { flex: 2, textAlign: 'right' }]}>
+                                        {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(t.amount)}
+                                    </Text>
+                                </View>
+                            ))
+                        ) : (
+                            <Text style={styles.paragraph}>No transactions found.</Text>
+                        )}
+                    </View>
                 )}
-                </tbody>
-            </table>
+            </View>
+
+            {analysisScore && (
+                <View style={styles.card}>
+                    {typeof analysisScore === "string" ? (
+                        <>
+                            <Text style={styles.cardTitle}>AI Transaction Analysis</Text>
+                            <Text style={styles.paragraph}>{analysisScore}</Text>
+                        </>
+                    ) : (
+                        <>
+                            <Text style={styles.cardTitle}>Your Financial Health Score</Text>
+                            {analysisScore.score !== null ? (
+                                <Text style={[styles.bigScore, { color: analysisScore.score >= 75 ? '#28a745' : analysisScore.score >= 50 ? '#ffc107' : '#dc3545' }]}>
+                                    {analysisScore.score} / 100
+                                </Text>
+                            ) : (
+                                <Text style={[styles.paragraph, { color: '#dc3545', fontWeight: 'bold' }]}>Analysis Error</Text>
+                            )}
+                            <Text style={{...styles.paragraph, fontWeight: 'bold', textAlign: 'left', alignSelf: 'stretch', marginTop: 10 }}>Key Reasonings:</Text>
+                            <View style={{alignSelf: 'stretch', paddingLeft: 20}}>
+                                {analysisScore.reasoning.map((point, index) => (
+                                    <Text key={index} style={{...styles.paragraph, textAlign: 'left', marginVertical: 4}}>• {point}</Text>
+                                ))}
+                            </View>
+                        </>
+                    )}
+                </View>
             )}
-        </div>
-        
-        {/* The analysis box is now always present when in history view */}
-        {analysisScore && (
-            <div style={styles.analysisBox}>
-            
-            {/* Display logic based on the state type (string for loading/initial, object for result) */}
-            {typeof analysisScore === "string" ? (
-                // Loading State
-                <>
-                    <h4>AI Transaction Analysis:</h4>
-                    <p style={styles.loadingText}>Analyzing your financial health...</p>
-                </>
-            ) : (
-                // Result State
-                <>
-                <h4>Your Financial Health Score:</h4>
-                {analysisScore.score !== null ? (
-                    <div style={{
-                        ...styles.bigScore,
-                        color: analysisScore.score >= 75 ? 'green' : analysisScore.score >= 50 ? 'orange' : 'red' 
-                    }}>
-                        {analysisScore.score} / 100
-                    </div>
-                ) : (
-                    // Display error if score is null
-                    <p style={{color: 'red', fontWeight: 'bold'}}>Analysis Error</p>
-                )}
-                
-                <strong>Key Reasonings:</strong>
-                <ul style={{ paddingLeft: '20px', marginTop: '5px' }}>
-                    {/* Map the array of reasoning strings to list items */}
-                    {analysisScore.reasoning.map((point, index) => (
-                        <li key={index} style={{ marginBottom: '5px' }}>{point}</li>
-                    ))}
-                </ul>
-                </>
-            )}
-            </div>
-        )}
-        </div>
+        </>
     );
   };
 
-
-  // --- Main Render ---
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>Bank Connection</h2>
+    <View style={styles.container}>
+      <Text style={styles.title}>Bank Connection</Text>
       
-      {!accountLinked ? (
-        <button style={styles.button} onClick={handleLinkAccount}>Link Your Bank Account</button>
-      ) : (
+      {accountLinked ? (
         view === 'main' ? renderMainView() : renderHistoryView()
+      ) : (
+        <View style={styles.card}>
+            <Text style={styles.paragraph}>Link your bank account to get started.</Text>
+            {/* In a real app, this would trigger a service like Plaid */}
+            <TouchableOpacity style={styles.button} onPress={() => setAccountLinked(true)}>
+                <Text style={styles.buttonText}>Link Bank Account</Text>
+            </TouchableOpacity>
+        </View>
       )}
       
-      <button 
-        style={{...styles.button, marginTop: '30px'}} 
-        onClick={() => view === 'main' ? navigate('Home') : setView('main')}
-      >
-        {view === 'main' ? 'Back to Home' : 'Back to Savings'}
-      </button>
-    </div>
+      <TouchableOpacity 
+        style={{...styles.button, backgroundColor: '#6c757d', marginTop: 20}} 
+        onClick={() => view === 'main' ? navigate('Home') : setView('main')}>
+        <Text style={styles.buttonText}>{view === 'main' ? 'Back to Home' : 'Back to Bank'}</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
+const styles = {
+    container: {
+        padding: 20,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        width: '100%',
+        height: '100%',
+    },
+    card: {
+        width: '100%',
+        maxWidth: 600,
+        padding: '20px',
+        backgroundColor: 'rgba(40, 40, 40, 0.85)',
+        borderRadius: 10,
+        border: '1px solid #555',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    title: {
+        color: '#FFFFFF',
+        fontSize: '24px',
+        fontWeight: 'bold',
+        marginBottom: '20px',
+        textAlign: 'center',
+    },
+    cardTitle: {
+        color: '#FFFFFF',
+        fontSize: '20px',
+        fontWeight: 'bold',
+        marginBottom: '15px',
+    },
+    paragraph: {
+        color: '#DDDDDD',
+        marginBottom: '15px',
+        lineHeight: 22,
+        fontSize: '16px',
+        textAlign: 'center',
+    },
+    input: {
+      height: 40,
+      width: '100%',
+      borderColor: '#555',
+      borderWidth: 1,
+      borderRadius: 5,
+      paddingHorizontal: 10,
+      marginBottom: 20,
+      color: '#FFFFFF',
+      backgroundColor: 'rgba(0,0,0,0.3)',
+    },
+    button: {
+        width: '100%',
+        padding: '12px 20px',
+        borderRadius: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: '16px',
+    },
+    bigScore: {
+        fontSize: '48px',
+        fontWeight: '900',
+        marginVertical: 10,
+    },
+    table: {
+        width: '100%',
+        border: '1px solid #555',
+        borderRadius: 5,
+        overflow: 'hidden',
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        borderBottomWidth: 1,
+        borderColor: '#555',
+    },
+    tableRow: {
+        flexDirection: 'row',
+        borderBottomWidth: 1,
+        borderColor: '#555',
+    },
+    tableCell: {
+        padding: '10px',
+        color: '#DDDDDD',
+        fontSize: '14px',
+    }
+};
+
 export default BankScreen;
+
