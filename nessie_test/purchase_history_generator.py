@@ -6,7 +6,7 @@ import time
 # --- 1. Configuration ---
 # ⚠️ PASTE YOUR API KEY HERE!
 
-API_KEY = ''
+API_KEY = 'f3dc4a94e412841a3b0949d7a90f4e5c'
 BASE_URL = 'http://api.nessieisreal.com'
 
 # --- Optional Existing IDs ---
@@ -18,9 +18,9 @@ BASE_URL = 'http://api.nessieisreal.com'
 # Empty Customer
 
 # Generic Customer
-# EXISTING_CUSTOMER_ID = "68f426849683f20dd519ff48" 
-# EXISTING_CHECKING_ID = "68f426849683f20dd519ff49"
-# EXISTING_SAVINGS_ID = "68f426849683f20dd519ff4a"
+EXISTING_CUSTOMER_ID = "68f426849683f20dd519ff48" 
+EXISTING_CHECKING_ID = "68f426849683f20dd519ff49"
+EXISTING_SAVINGS_ID = "68f426849683f20dd519ff4a"
 
 # Good Customer
 # EXISTING_CUSTOMER_ID = "68f441ee9683f20dd51a0c59"
@@ -33,9 +33,9 @@ BASE_URL = 'http://api.nessieisreal.com'
 # EXISTING_SAVINGS_ID =  "68f4425a9683f20dd51a0d6e"
 
 # --- Stage Control Booleans ---
-Generate = False
-Generate_Deposit = False
-Generate_Transfer = False
+Generate = True
+Generate_Deposit = True
+Generate_Transfer = True
 Generate_Good = False
 Generate_Bad = False
 Get = True

@@ -1,4 +1,5 @@
 const API_URL = 'http://localhost:3001/api/ai';
+const NESSIE2_URL = 'http://localhost:3001/api/nessie2';
 // App.js
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
@@ -116,8 +117,13 @@ export default function App() {
     e.preventDefault();
     if (!chatInput.trim() || isBotTyping) return;
     const newUserMessage = { role: 'user', text: chatInput };
+    const userContext = await fetch(NESSIE2_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt:  process.env.NESSIE_ACCOUNT_ID}),
+    })
     setChatMessages(prev => [...prev, newUserMessage]);
-    const currentInput = chatInput;
+    const currentInput = chatInput + " The following contains relevant purchase, deposit, and transfer history: " + userContext;
     setChatInput('');
     setIsBotTyping(true);
     try {
