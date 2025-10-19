@@ -31,6 +31,7 @@ export default function App() {
   // ... (All your existing state and functions remain unchanged) ...
   const [globalGold, setGlobalGold] = useState(150);
   const [userAge, setUserAge] = useState(10);
+  const [lastAnalysisScore, setLastAnalysisScore] = useState(0);
   const [pets, setPets] = useState([
     { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
     { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}, lessonProgress: 0, lessonsCompleted: false },
@@ -79,11 +80,10 @@ export default function App() {
 
   const handleNewDay = () => {
     if (!selectedPetId) { alert("Please select a pet first."); return; }
-    const randomAmount = Math.floor(Math.random() * 201) + 50;
-    updateGlobalGold(prev => prev + randomAmount);
+    updateGlobalGold(prev => prev + (lastAnalysisScore || 0));
     const hpLoss = Math.floor(Math.random() * 5) + 1;
     updatePet(selectedPetId, (p) => ({ hp: Math.max(0, p.hp - hpLoss) }));
-    alert(`New Day: Found ${randomAmount} gold and lost ${hpLoss} HP!`);
+    alert(`New Day: Found ${lastAnalysisScore || 0} gold from your last analysis score and lost ${hpLoss} HP!`);
   };
   
   const advanceLesson = (id) => {
@@ -104,6 +104,7 @@ export default function App() {
     updatePet, addPet, setPets,
     globalGold, updateGlobalGold, addXp,
     userAge, lessonsData, advanceLesson, markLessonsCompleted,
+    setLastAnalysisScore,
   }), [pets, selectedPet, selectedPetId, globalGold, userAge]);
 
   const [screen, setScreen] = useState('Home');

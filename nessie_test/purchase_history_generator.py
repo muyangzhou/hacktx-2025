@@ -2,11 +2,19 @@ import requests
 import datetime
 import random
 import time
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+
+# Load environment variables from .env file
+dotenv_path = Path("..\.env")
+load_dotenv(dotenv_path=dotenv_path)
 
 # --- 1. Configuration ---
 # ⚠️ PASTE YOUR API KEY HERE!
 
-API_KEY = 'f3dc4a94e412841a3b0949d7a90f4e5c'
+API_KEY = os.getenv("NESSIE_API_KEY") 
 BASE_URL = 'http://api.nessieisreal.com'
 
 # --- Optional Existing IDs ---
@@ -33,12 +41,12 @@ EXISTING_SAVINGS_ID = "68f426849683f20dd519ff4a"
 # EXISTING_SAVINGS_ID =  "68f4425a9683f20dd51a0d6e"
 
 # --- Stage Control Booleans ---
-Generate = True
-Generate_Deposit = True
-Generate_Transfer = True
-Generate_Good = False
+Generate = False
+Generate_Deposit = False
+Generate_Transfer = False
+Generate_Good = True
 Generate_Bad = False
-Get = True
+Get = False
 Delete = False
 
 
@@ -197,7 +205,7 @@ def generate_good_random_purchases(account_id):
         purchase_payload = {
             "merchant_id": generic_merchant_id, "medium": "balance",
             "purchase_date": purchase_date, "amount": amount,
-            "description": f"Purchase at {vendor}" 
+            "description": f"{vendor}" 
         }
         post_request(f'/accounts/{account_id}/purchases', purchase_payload)
     print(f"  Simulated 40 good random purchases.")
@@ -220,7 +228,7 @@ def generate_bad_random_purchases(account_id):
         purchase_payload = {
             "merchant_id": generic_merchant_id, "medium": "balance",
             "purchase_date": purchase_date, "amount": amount,
-            "description": f"Purchase at {vendor}" 
+            "description": f"{vendor}" 
         }
         post_request(f'/accounts/{account_id}/purchases', purchase_payload)
     print(f"  Simulated 40 bad random purchases.")
@@ -329,7 +337,7 @@ def display_transfer_history(account_id):
 
 def main():
     """Runs the main financial simulation."""
-    
+
     global EXISTING_CUSTOMER_ID, EXISTING_CHECKING_ID, EXISTING_SAVINGS_ID
 
     if API_KEY == 'YOUR_NESSIE_API_KEY':

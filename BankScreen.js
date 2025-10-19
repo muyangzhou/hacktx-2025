@@ -14,7 +14,7 @@ const BankScreen = ({ navigate }) => {
   const [view, setView] = useState('main'); 
   const [transactions, setTransactions] = useState(null); 
   const [analysisScore, setAnalysisScore] = useState(null); 
-  const { globalGold, updateGlobalGold } = usePets();
+  const { globalGold, updateGlobalGold, setLastAnalysisScore } = usePets();
 
   const handleAddSavings = () => {
     const savedAmount = parseFloat(savings);
@@ -80,6 +80,7 @@ const BankScreen = ({ navigate }) => {
                 score: Math.max(0, Math.min(100, Math.round(parsedData.score))),
                 reasoning: parsedData.reasoning.map(String)
             };
+            setLastAnalysisScore(analysisResult.score);
       } else {
             throw new Error("Parsed JSON structure is invalid.");
       }
