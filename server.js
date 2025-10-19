@@ -6,6 +6,7 @@ import { promptAI } from './backend/ai.js'; // Your original AI function
 import { getFormattedPurchaseHistory } from './backend/nessie.js';
 import { parseReceiptWithGemini } from './backend/receiptReader.js';
 import { postPurchaseToNessie } from './backend/receiptReader.js';
+import { getGeneralHistory } from './backend/nessie2.js';
 
 const app = express();
 const PORT = 3001; // Choose a port different from your React app (usually 3000)
@@ -68,6 +69,8 @@ app.post('/api/nessie2', async (req, res) => {
 
         // Call the secure AI utility function
         const response = await getGeneralHistory(prompt);
+
+        console.log(response);
 
         // Send the AI response back to the React client
         res.json({ text: response });

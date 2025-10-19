@@ -120,10 +120,13 @@ export default function App() {
     const userContext = await fetch(NESSIE2_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt:  process.env.NESSIE_ACCOUNT_ID}),
-    })
+      body: JSON.stringify({ prompt: "68f426849683f20dd519ff49" }),
+    });
+    // if (!response.ok) throw new Error('Network response was not ok');
+    const data2 = await userContext.json();
+
     setChatMessages(prev => [...prev, newUserMessage]);
-    const currentInput = chatInput + " The following contains relevant purchase, deposit, and transfer history: " + userContext;
+    const currentInput = chatInput + " The following contains relevant purchase, deposit, and transfer history: " + data2.text;
     setChatInput('');
     setIsBotTyping(true);
     try {

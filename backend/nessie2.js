@@ -157,25 +157,76 @@ export async function getGeneralHistory(accountId) {
         ]);
 
         // Print Purchases
-        if (purchaseHistory !== null) {
-            console.log("\n--- Formatted Purchase History (JSON) ---");
-            console.log(JSON.stringify(purchaseHistory, null, 2));
-        }
+        // if (purchaseHistory !== null) {
+        //     console.log("\n--- Formatted Purchase History (JSON) ---");
+        //     console.log(JSON.stringify(purchaseHistory, null, 2));
+        // }
 
-        // Print Deposits
-        if (depositHistory !== null) {
-            console.log("\n--- Formatted Deposit History (JSON) ---");
-            console.log(JSON.stringify(depositHistory, null, 2));
-        }
+        // // Print Deposits
+        // if (depositHistory !== null) {
+        //     console.log("\n--- Formatted Deposit History (JSON) ---");
+        //     console.log(JSON.stringify(depositHistory, null, 2));
+        // }
 
-        // Print Transactions (Transfers)
-        if (transactionHistory !== null) {
-            console.log("\n--- Formatted Transaction History (JSON) ---");
-            console.log(JSON.stringify(transactionHistory, null, 2));
-        }
+        // // Print Transactions (Transfers)
+        // if (transactionHistory !== null) {
+        //     console.log("\n--- Formatted Transaction History (JSON) ---");
+        //     console.log(JSON.stringify(transactionHistory, null, 2));
+        // }
 
         return "Purchase History: " + JSON.stringify(purchaseHistory, null, 2) +
                 "Deposit History: " + JSON.stringify(depositHistory, null, 2) +
                 "Transaction History: " + JSON.stringify(transactionHistory, null, 2)
     }
 }
+
+/**
+ * Main method to run the test.
+ */
+async function main() {
+    // console.log("Starting test script for getGeneralHistory...");
+    
+    // const result = await getGeneralHistory(process.env.NESSIE_ACCOUNT_ID);
+
+    // console.log("\n=======================================================");
+    // console.log("                 TEST RESULTS SUMMARY");
+    // console.log("=======================================================");
+
+    // // 1. Transaction Summary
+    // if (Array.isArray(result.transactions)) {
+    //     console.log(`\nTransaction Status: SUCCESS (Fetched ${result.transactions.length} items)`);
+    //     // Sort and display the first transaction date to confirm sorting potential
+    //     const sorted = [...result.transactions].sort((a, b) => {
+    //         const dateA = new Date(a.purchase_date || a.transaction_date);
+    //         const dateB = new Date(b.purchase_date || b.transaction_date);
+    //         return dateB - dateA; // Descending
+    //     });
+    //     console.log(`Latest Transaction Date: ${sorted[0]?.purchase_date || 'N/A'}`);
+    // } else {
+    //     console.log(`\nTransaction Status: FAILED. Message: ${result.transactions}`);
+    // }
+
+    // // 2. AI Analysis Summary
+    // const analysis = result.analysis;
+    // if (typeof analysis === 'object' && analysis.score !== undefined) {
+    //     console.log("\nAI Analysis Status: SUCCESS");
+    //     console.log(`FINANCIAL HEALTH SCORE: ${analysis.score || 'N/A'} / 100`);
+    //     console.log("\nREASONING:");
+    //     if (Array.isArray(analysis.reasoning)) {
+    //         analysis.reasoning.forEach((point, index) => {
+    //             console.log(`  ${index + 1}. ${point}`);
+    //         });
+    //     } else {
+    //         console.log("  Reasoning is malformed or missing.");
+    //     }
+    // } else {
+    //     console.log("\nAI Analysis Status: FAILED. Check backend server.");
+    //     console.log(`Raw Error: ${JSON.stringify(analysis)}`);
+    // }
+    
+    // console.log("=======================================================\n");
+    console.log(await getGeneralHistory(process.env.NESSIE_ACCOUNT_ID));
+}
+
+// Execute the main method
+// main();
