@@ -52,8 +52,9 @@ export default function App() {
     setPets(prev => [...prev, newPet]);
 
   };
-  const updateGlobalGold = (updater) => setGlobalGold(updater);
-  
+  const updateGlobalGold = (updater) =>
+    setGlobalGold(prev => (typeof updater === 'function' ? updater(prev) : updater));
+
   const addXp = (id, amount) => {
     let petToUpdate = pets.find(p => p.id === id);
     if (!petToUpdate) return;

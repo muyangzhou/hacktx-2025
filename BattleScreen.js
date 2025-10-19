@@ -69,6 +69,12 @@ export default function BattleScreen({ navigate }) {
         accessibilityLabel={selectedPet.name}
       />
       <Text style={styles.text}>Enemy HP: {enemyHp}/30</Text>
+      
+      <Image
+        source={require('./assets/kenney_animal-pack-redux/PNG/Round (outline)/snake.png')}
+        style={{ width: 64, height: 64, marginVertical: 10 }}
+        accessibilityLabel='enemy'
+      />
 
         <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={playerAttack}>
