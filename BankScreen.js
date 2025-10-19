@@ -15,7 +15,7 @@ const BankScreen = ({ navigate }) => {
   const [view, setView] = useState('main'); // 'main' or 'history'
   // transactions can be null, a string ('Loading...'), or an array
   const [transactions, setTransactions] = useState(null); 
-  // analysisScore will now be an object { score: number|null, reasoning: string } 
+  // analysisScore will now be an object { score: number|null, reasoning: string[] } 
   // or a string ('Analyzing...') for the initial loading state
   const [analysisScore, setAnalysisScore] = useState(null); 
 
@@ -54,7 +54,7 @@ const BankScreen = ({ navigate }) => {
     setView('history');
     
     let fetchedTransactions = null;
-    let analysisResult = { score: null, reasoning: "Error: AI analysis failed to process." };
+    let analysisResult = { score: null, reasoning: ["Error: AI analysis failed to process."] };
 
     try {
       // 2. Fetch transactions from the bank API
@@ -72,15 +72,17 @@ const BankScreen = ({ navigate }) => {
       
       // Check if we have a valid array to analyze 
       if (!Array.isArray(fetchedTransactions) || fetchedTransactions.length === 0) {
-          analysisResult.reasoning = "No transactions found to analyze.";
+          analysisResult.reasoning = ["No transactions found to analyze."];
           setAnalysisScore(analysisResult);
+          // Alert user that no reward was given due to no data
+          alert("No transactions found to analyze. No reward granted.");
           return;
       }
       
       // 3. Format the transaction data for the AI
       const formattedTransactionData = JSON.stringify(fetchedTransactions, null, 2);
 
-      // UPDATED PROMPT: Ask for reasoning as a JSON array of strings
+      // UPDATED PROMPT to ensure reasoning comes back as an array of strings for list formatting
       const instructions = "Analyze the following list of transactions in terms of \
 how healthy or unhealthy this list of transactions is. Give the overall list \
 of transactions a score value from 0 - 100, where higher scores represent healthy \
@@ -124,6 +126,20 @@ Respond ONLY with a JSON string containing two fields: 'score' (an integer from 
       }
       
       setAnalysisScore(analysisResult); 
+      
+      // --- NEW REWARD LOGIC: Grant coins equal to the financial health score ---
+      if (analysisResult.score !== null && analysisResult.score > 0) {
+          const rewardAmount = analysisResult.score;
+          updateGlobalGold(prevGold => prevGold + rewardAmount);
+          alert(`Analysis Complete! Your Financial Health Score is ${rewardAmount}/100. You earned ${rewardAmount} in-game currency!`);
+      } else if (analysisResult.score !== null && analysisResult.score <= 0) {
+          alert(`Analysis Complete! Your Financial Health Score is 0/100. No reward granted.`);
+      } else {
+          // If analysisResult.score is null (parsing failed)
+          alert("Analysis completed with errors. No reward granted.");
+      }
+      // --- END NEW REWARD LOGIC ---
+
 
     } catch (error) {
       console.error("Error in fetch or analysis:", error);
@@ -132,6 +148,7 @@ Respond ONLY with a JSON string containing two fields: 'score' (an integer from 
       analysisResult.reasoning = [`Error: ${error.message || "Could not complete bank or AI call."}`];
       analysisResult.score = null;
       setAnalysisScore(analysisResult);
+      alert("An error occurred during transaction fetch or analysis. No reward granted.");
     }
   };
 
@@ -207,7 +224,7 @@ Respond ONLY with a JSON string containing two fields: 'score' (an integer from 
         fontWeight: 'bold',
         color: '#007bff',
     },
-    // NEW: Style for the big score number
+    // Style for the big score number
     bigScore: {
         fontSize: '48px',
         fontWeight: '900',
