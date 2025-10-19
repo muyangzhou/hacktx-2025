@@ -7,11 +7,12 @@ const NESSIE_API_URL = 'http://localhost:3001/api/nessie';
 const GENAI_API_URL = 'http://localhost:3001/api/ai';
 const DUMMY_ACCOUNT_ID = '68f426849683f20dd519ff49';
 
-const BankScreen = ({ navigate }) => {
-  // ... (State and logic functions are unchanged) ...
+// --- MODIFIED: Accept bankView and setBankView as props ---
+const BankScreen = ({ navigate, bankView, setBankView }) => {
   const [accountLinked, setAccountLinked] = useState(true); 
   const [savings, setSavings] = useState('');
-  const [view, setView] = useState('main'); 
+  // --- REMOVED: Local view state is no longer needed ---
+  // const [view, setView] = useState('main'); 
   const [transactions, setTransactions] = useState(null); 
   const [analysisScore, setAnalysisScore] = useState(null); 
   const { globalGold, updateGlobalGold } = usePets();
@@ -29,8 +30,8 @@ const BankScreen = ({ navigate }) => {
   };
 
   const handleFetchTransactions = async () => {
-    // ... (logic unchanged) ...
-    setView('history');
+    // --- MODIFIED: Use setBankView prop ---
+    setBankView('history');
     setTransactions("Loading transactions...");
     setAnalysisScore("Analyzing..."); 
     
@@ -95,7 +96,6 @@ const BankScreen = ({ navigate }) => {
     }
   };
 
-  // ... (renderMainView and renderHistoryView are unchanged) ...
   const renderMainView = () => (
     <>
       <View style={styles.card}>
@@ -132,7 +132,7 @@ const BankScreen = ({ navigate }) => {
 
     return (
         <>
-            <View style={styles.card}>
+            <View style={[styles.card, { maxHeight: 240 }]}>
                 <Text style={styles.cardTitle}>Recent Transactions</Text>
                 {typeof transactions === 'string' ? (
                     <Text style={styles.paragraph}>{transactions}</Text>
@@ -163,7 +163,7 @@ const BankScreen = ({ navigate }) => {
             </View>
 
             {analysisScore && (
-                <View style={styles.card}>
+                <View style={[styles.card, { maxHeight: 240 }]}>
                     {typeof analysisScore === "string" ? (
                         <>
                             <Text style={styles.cardTitle}>AI Transaction Analysis</Text>
@@ -176,11 +176,11 @@ const BankScreen = ({ navigate }) => {
                                 <Text style={[styles.bigScore, { color: analysisScore.score >= 75 ? '#28a745' : analysisScore.score >= 50 ? '#ffc107' : '#dc3545' }]}>
                                     {analysisScore.score} / 100
                                 </Text>
-                            ) : (
+                                ) : (
                                 <Text style={[styles.paragraph, { color: '#dc3545', fontWeight: 'bold' }]}>Analysis Error</Text>
                             )}
-                            <Text style={{...styles.paragraph, fontWeight: 'bold', textAlign: 'left', alignSelf: 'stretch', marginTop: 10 }}>Key Reasonings:</Text>
                             <ScrollView style={styles.scrollBox}>
+                                <Text style={{...styles.paragraph, fontWeight: 'bold', textAlign: 'left', alignSelf: 'stretch', marginTop: 10 }}>Key Reasonings:</Text>
                                 <View style={{alignSelf: 'stretch', paddingLeft: 20}}>
                                     {analysisScore.reasoning.map((point, index) => (
                                         <Text key={index} style={{...styles.paragraph, textAlign: 'left', marginVertical: 4}}>• {point}</Text>
@@ -201,7 +201,8 @@ const BankScreen = ({ navigate }) => {
       <Text style={styles.title}>Bank Connection</Text>
       
       {accountLinked ? (
-        view === 'main' ? renderMainView() : renderHistoryView()
+        // --- MODIFIED: Use bankView prop ---
+        bankView === 'main' ? renderMainView() : renderHistoryView()
       ) : (
         <View style={styles.card}>
             <Text style={styles.paragraph}>Link your bank account to get started.</Text>
@@ -211,31 +212,22 @@ const BankScreen = ({ navigate }) => {
         </View>
       )}
       
-      {/* --- THIS BUTTON IS MODIFIED --- */}
-      {/* It only renders in history view and only navigates INTERNALLY */}
-      {view === 'history' && (
-        <TouchableOpacity 
-          style={{...styles.button, backgroundColor: '#6c757d', marginTop: 20}} 
-          onPress={() => setView('main')}>
-          <Text style={styles.buttonText}>Back to Bank</Text>
-        </TouchableOpacity>
-      )}
+      {/* --- REMOVED: The local "Back to Bank" button is gone --- */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
     container: {
-        // Removed padding, as it's now handled by contentArea in App.js
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         width: '100%',
-        flex: 1, // Use flex: 1 to fill available space
+        flex: 1, 
     },
     card: {
         width: '100%',
-        maxWidth: 600,
+        // --- REMOVED: maxHeight: 240 (This was clipping content) ---
         padding: 20,
         backgroundColor: 'rgba(40, 40, 40, 0.85)',
         borderRadius: 10,
@@ -257,7 +249,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 15,
     },
-    // ... (all other styles are unchanged) ...
     paragraph: {
         color: '#DDDDDD',
         marginBottom: 15,
@@ -291,12 +282,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     bigScore: {
+        // --- MODIFIED: Removed negative margin ---
         fontSize: 48,
         fontWeight: '900',
         marginVertical: 10,
     },
     table: {
         width: '100%',
+        // --- MODIFIED: Set a flexible max height ---
+        maxHeight: 150,
         borderWidth: 1,
         borderColor: '#555',
         borderRadius: 5,
@@ -320,7 +314,8 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollBox: {
-        maxHeight: 200, 
+        // --- MODIFIED: Set a flexible max height ---
+        maxHeight: 150, 
         width: '100%',
     }
 });
