@@ -31,11 +31,11 @@ export default function BattleScreen({ navigate }) {
   };
 
   const enemyAttack = () => {
-    updatePet(selectedPet.id, (p) => ({ hp: Math.max(0, p.hp - 3) }));
+    updatePet(selectedPet.id, (p) => ({ ...p, hp: Math.max(0, p.hp - 3) }));
   };
 
   const reset = () => {
-    updatePet(selectedPet.id, (p) => ({ hp: p.maxHp }));
+    updatePet(selectedPet.id, (p) => ({ ...p, hp: p.maxHp }));
     setEnemyHp(30);
   };
 
