@@ -1,7 +1,12 @@
 [
-  { "id": "w-basic-sword", "name": "Basic Sword", "slot": "weapon", "power": 3, "price": 50 },
-  { "id": "w-power-sword", "name": "Power Sword", "slot": "weapon", "power": 7, "price": 120 },
-  { "id": "w-mega-shield", "name": "Mega Shield", "slot": "weapon", "power": 0, "price": 80 },
+  { "id": "w-sword", "name": "Sword", "slot": "weapon", "power": 3, "price": 50 },
+  { "id": "w-pickaxe", "name": "Pickaxe", "slot": "weapon", "power": 2, "price": 25 },
+  { "id": "w-shovel", "name": "Shovel", "slot": "weapon", "power": 1, "price": 10 },
+  { "id": "w-war-hammer", "name": "War Hammer", "slot": "weapon", "power": 6, "price": 250 },
+  { "id": "w-war-axe", "name": "War Axe", "slot": "weapon", "power": 7, "price": 300 },
+  { "id": "w-bow-and-arrow", "name": "Bow and Arrow", "slot": "weapon", "power": 5, "price": 200 },
+  { "id": "w-bomb", "name": "Bomb", "slot": "weapon", "power": 8, "price": 400 },
+  { "id": "w-hatchet", "name": "Hatchet", "slot": "weapon", "power": 4, "price": 100 },
 
   { "id": "c-default-cap", "name": "Default Cap", "slot": "cosmetic", "price": 15 },
   { "id": "c-cool-hat", "name": "Cool Hat", "slot": "cosmetic", "price": 50 },

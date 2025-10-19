@@ -31,16 +31,16 @@ export default function BattleScreen({ navigate }) {
   };
 
   const enemyAttack = () => {
-    updatePet(selectedPet.id, (p) => ({ hp: Math.max(0, p.hp - 3) }));
+    updatePet(selectedPet.id, (p) => ({ ...p, hp: Math.max(0, p.hp - 3) }));
   };
 
   const reset = () => {
-    updatePet(selectedPet.id, (p) => ({ hp: p.maxHp }));
+    updatePet(selectedPet.id, (p) => ({ ...p, hp: p.maxHp }));
     setEnemyHp(30);
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={styles.battleContainer}>
       <h3>Battle</h3>
       <p>{selectedPet.name} HP: {selectedPet.hp}/{selectedPet.maxHp} (Lvl {selectedPet.level})</p>
       <Image
@@ -57,3 +57,13 @@ export default function BattleScreen({ navigate }) {
     </div>
   );
 }
+
+const styles = {
+  battleContainer: { 
+    padding: 20,
+    backgroundColor: '#a2a2a2',
+    // alignItems: 'center',
+    // display: 'flex',
+    // flexDirection: 'column',
+  },
+};

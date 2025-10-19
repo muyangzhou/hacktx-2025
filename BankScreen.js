@@ -39,7 +39,8 @@ const BankScreen = ({ navigate }) => {
       padding: '20px',
       fontFamily: 'Arial, sans-serif',
       height: '100vh',
-      boxSizing: 'border-box'
+      boxSizing: 'border-box',
+      backgroundColor: '#a2a2a2'
     },
     title: {
       fontSize: '22px',

@@ -52,11 +52,13 @@ export default function HomeScreen({ navigate }) {
         
         <div style={styles.petInfo}>
           <h2>{name}</h2>
-          <Image
-            source={petImages[id]}
-            style={{ width: 64, height: 64 }}
-            accessibilityLabel={name}
-          />
+          <div style={styles.petImageContainer}>
+            <Image
+              source={petImages[id]}
+              style={{ width: 64, height: 64 }}
+              accessibilityLabel={name}
+            />
+          </div>
           <p>Level: {level} ({xp}/{xpToNextLevel} XP)</p>
           <p>HP: {hp}/{maxHp}</p>
           <p>Attack: {attack}</p>
@@ -91,6 +93,7 @@ const styles = {
     flexDirection: 'column',
     height: '100%',
     boxSizing: 'border-box',
+    alignItems: 'center',
   },
   petBrowser: {
     display: 'flex',
@@ -98,8 +101,11 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#a2a2a3',
     borderRadius: 8,
+    maxWidth: 420,
+    width: '100%',
+    margin: '0 auto',
   },
   arrowButton: {
     fontSize: 24,
@@ -138,5 +144,11 @@ const styles = {
     padding: '12px',
     fontSize: 16,
     fontWeight: 'bold',
-  }
+  },
+  petImageContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: '10px 0',
+  },
 };

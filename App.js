@@ -3,15 +3,16 @@ const API_URL = 'http://localhost:3001/api/ai';
 import React, { useMemo, useState, useEffect, createContext, useContext } from 'react';
 import HomeScreen from './HomeScreen';
 import BattleScreen from './BattleScreen';
-//import ShopScreen from './ShopScreen';
+import ShopScreen from './ShopScreen';
 import BankScreen from './BankScreen';
 import InventoryScreen from './InventoryScreen';
+// import { promptAI } from './ai.js'; // <-- DO NOT import this here
 
 export const PetContext = createContext(null);
 export const usePets = () => useContext(PetContext);
 
 export default function App() {
-  // ... (all state and helper functions remain the same) ...
+  // ... (all other state and helper functions remain the same) ...
   const [globalGold, setGlobalGold] = useState(150);
   const [pets, setPets] = useState([
     { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
@@ -19,7 +20,7 @@ export default function App() {
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
-  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...updater(p) } : p)));
+  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) } : p)));
   const addPet = (pet) => setPets(prev => [...prev, pet]);
   const updateGlobalGold = (updater) => setGlobalGold(updater);
   const addXp = (id, amount) => {
@@ -70,31 +71,51 @@ export default function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
+
+  // --- Updated Chatbot Logic ---
   const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() || isBotTyping) return;
+
     const newUserMessage = { role: 'user', text: chatInput };
     setChatMessages(prev => [...prev, newUserMessage]);
+    
+    const currentInput = chatInput;
     setChatInput('');
     setIsBotTyping(true);
 
-    const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ prompt: chatInput }), // Send the user's text as JSON
-        });
+    try {
+      // --- This is where you call your server ---
+      // (You will need to create this server and deploy it)
+      const response = await fetch('https://your-server-url.com/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: currentInput }),
+      });
 
-    const data = await response.json();
-    const aiResponseText = data.text;
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
 
-    setTimeout(() => {
-      const botResponse = { role: 'bot', text: aiResponseText };
+      const data = await response.json();
+      alert("data: " + data.text);
+      const botResponse = { role: 'bot', text: data.text }; // Assuming your server returns { text: "..." }
       setChatMessages(prev => [...prev, botResponse]);
+      // --- End API Call ---
+      console.log(await promptAI("<prompt>"));
+
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+      const errorResponse = { role: 'bot', text: "Sorry, I'm having trouble connecting right now." };
+      setChatMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsBotTyping(false);
-    }, 1500);
+    }
   };
+
+  // ... (renderMenu, renderDebugMenu, renderChatbot, and return() remain the same) ...
   const renderMenu = () => {
     if (!menuOpen) return null;
     return (
@@ -154,35 +175,23 @@ export default function App() {
       </div>
     );
   };
-
   return (
     <PetContext.Provider value={value}>
       <div style={styles.appContainer}>
-        {/* --- Global Header --- */}
         <div style={styles.headerBar}>
           <div style={styles.goldDisplay}>Gold: {globalGold}</div>
           <button onClick={() => setMenuOpen(true)}>☰ Menu</button>
         </div>
-
-        {/* --- Screen Content Area --- */}
-        {/* --- overflowY is now set dynamically --- */}
-        <div style={{
-            ...styles.screenContainer, 
-            overflowY: screen === 'Inventory' ? 'hidden' : 'auto' 
-          }}>
+        <div style={styles.screenContainer}>
           {screen === 'Home'   && <HomeScreen   navigate={navigate} />}
           {screen === 'Battle' && <BattleScreen navigate={navigate} params={params} />}
-          {/*screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />*/}
+          {screen === 'Shop'   && <ShopScreen   navigate={navigate} params={params} />}
           {screen === 'Bank'   && <BankScreen   navigate={navigate} />}
           {screen === 'Inventory' && <InventoryScreen navigate = {navigate} />}
         </div>
-
-        {/* --- Render Popups (if open) --- */}
         {renderMenu()}
         {renderDebugMenu()}
         {renderChatbot()}
-
-        {/* --- Debug Toggle Button --- */}
         <button style={styles.debugToggleButton} onClick={() => setDebugMenuOpen(prev => !prev)}>
           Debug ⚙️
         </button>
@@ -191,24 +200,36 @@ export default function App() {
   );
 }
 
-// ... (existing styles)
+// ... (styles remain identical) ...
 const styles = {
   appContainer: {
     fontFamily: 'Arial, sans-serif',
     height: '100vh',
+    width: '100vw',
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: '#121212',
+    backgroundImage: 'url(https://cdn.mos.cms.futurecdn.net/BfemybeKVXCf9pgX9WCxsc-1200-80.jpg)',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'repeat',
+    backgroundAttachment: 'fixed',
   },
   headerBar: {
     padding: '10px 20px',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#dcdcdc',
     borderBottom: '1px solid #ddd',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexShrink: 0,
     zIndex: 10,
+    position: 'sticky',   // stays at top on scroll
+    top: 0,
+    width: '100%',        // span full app width
+    boxSizing: 'border-box'
   },
   goldDisplay: {
     fontSize: 16,
@@ -216,9 +237,15 @@ const styles = {
   },
   screenContainer: {
     flex: 1,
-    overflowY: 'auto', // <-- Added back
+    display: 'flex',
+    overflowY: 'auto',
     position: 'relative',
     paddingBottom: 60,
+    paddingTop: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
   },
   menuOverlay: {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -255,7 +282,6 @@ const styles = {
     padding: '10px', fontSize: 14, cursor: 'pointer',
     backgroundColor: '#eee', border: '1px solid #ccc', borderRadius: 5,
   },
-  // --- Chatbot Styles ---
   chatOverlay: {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
