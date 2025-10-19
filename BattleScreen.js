@@ -10,9 +10,21 @@ export default function BattleScreen({ navigate }) {
 
   const [enemyHp, setEnemyHp] = useState(30);
 
+  // Compute attack with equipped weapon buff
+  const getWeaponBuff = (pet) => {
+    const inv = pet?.inventory || [];
+    const weaponId = pet?.equipped?.weapon || null;
+    if (!weaponId) return 0;
+    const item = inv.find(i => i.id === weaponId);
+    return Number(item?.power) || 0; // power = +ATK from your items
+  };
+  const baseAtk = Number(selectedPet?.attack) || 0;
+  const atkBuff = getWeaponBuff(selectedPet);
+  const effectiveAtk = baseAtk + atkBuff;
+
   const playerAttack = () => {
     // Check for victory
-    if (enemyHp - selectedPet.attack <= 0) {
+    if (enemyHp - effectiveAtk <= 0) {
       const goldWon = Math.floor(Math.random() * 10) + 5; // Win 5-14 gold
       const xpGained = Math.floor(Math.random() * 15) + 10; // Win 10-24 XP
 
@@ -26,7 +38,7 @@ export default function BattleScreen({ navigate }) {
       setEnemyHp(30); 
     } else {
       // Not a victory, just do damage
-      setEnemyHp(h => Math.max(0, h - selectedPet.attack));
+      setEnemyHp(h => Math.max(0, h - effectiveAtk));
     }
   };
 
@@ -42,7 +54,10 @@ export default function BattleScreen({ navigate }) {
   return (
     <div style={styles.battleContainer}>
       <h3>Battle</h3>
-      <p>{selectedPet.name} HP: {selectedPet.hp}/{selectedPet.maxHp} (Lvl {selectedPet.level})</p>
+      <p>
+        {selectedPet.name} HP: {selectedPet.hp}/{selectedPet.maxHp} (Lvl {selectedPet.level})<br/>
+        ATK: {baseAtk}{atkBuff ? ` + ${atkBuff} = ${effectiveAtk}` : ''}
+      </p>
       <Image
         source={petImages[selectedPet.id]}
         style={{ width: 64, height: 64 }}

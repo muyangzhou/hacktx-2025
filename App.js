@@ -15,13 +15,22 @@ export default function App() {
   // ... (all other state and helper functions remain the same) ...
   const [globalGold, setGlobalGold] = useState(150);
   const [pets, setPets] = useState([
-    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 7, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
-    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 5, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p1', name: 'Moon', level: 3, hp: 35, maxHp: 35, attack: 1, xp: 0, xpToNextLevel: 300, inventory: [], equipped: {weapon: null, comsetic:null}},
+    { id: 'p2', name: 'Aqua',   level: 1, hp: 20, maxHp: 20, attack: 2, xp: 0, xpToNextLevel: 100, inventory: [], equipped: {weapon: null, comsetic:null}},
   ]);
   const [selectedPetId, setSelectedPetId] = useState('p1');
   const selectedPet = useMemo(() => pets.find(p => p.id === selectedPetId) ?? null, [pets, selectedPetId]);
-  const updatePet = (id, updater) => setPets(prev => prev.map(p => (p.id === id ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) } : p)));
+
+  const updatePet = (id, updater) =>
+    setPets(prev =>
+      prev.map(p =>
+        p.id === id
+          ? { ...p, ...(typeof updater === 'function' ? updater(p) : updater) }
+          : p
+      )
+    );
   const addPet = (pet) => setPets(prev => [...prev, pet]);
+
   const updateGlobalGold = (updater) => setGlobalGold(updater);
   const addXp = (id, amount) => {
     let petToUpdate = pets.find(p => p.id === id);
