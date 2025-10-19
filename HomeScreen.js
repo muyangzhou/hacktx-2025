@@ -13,8 +13,6 @@ export default function HomeScreen({ navigate }) {
     addPet,
   } = usePets();
 
-  // "handleNewDay" logic has been moved to App.js
-
   const currentIndex = pets.findIndex(p => p.id === selectedPetId);
 
   const handlePrevious = () => {
@@ -35,7 +33,7 @@ export default function HomeScreen({ navigate }) {
 
   if (!selectedPet) {
     return (
-      <div style={{ padding: 20 }}>
+      <div style={{ padding: 20, textAlign: 'center' }}>
         <p>No pet selected.</p>
         <button onClick={handleAddPet}>Add First Pet</button>
       </div>
@@ -63,21 +61,18 @@ export default function HomeScreen({ navigate }) {
           <p>HP: {hp}/{maxHp}</p>
           <p>Attack: {attack}</p>
           
-          {/* --- Pet-Specific Action Buttons --- */}
           <div style={styles.petActions}>
             <button style={styles.actionButton} onClick={() => navigate('Battle')}>Battle</button>
             <button style={styles.actionButton} onClick={() => navigate('Inventory')}>Inventory</button>
-            {/* --- "Item Shop" button removed --- */}
           </div>
         </div>
 
         <button onClick={handleNext} style={styles.arrowButton}>{'>'}</button>
       </div>
 
-      {/* --- "New Day" / Debug Section Removed --- */}
-
       {/* --- Global Action Buttons --- */}
       <div style={styles.globalActions}>
+        <button style={styles.globalButton} onClick={() => navigate('Lessons')}>Video Lessons</button>
         <button style={styles.globalButton} onClick={() => navigate('Bank')}>Bank</button>
         <button style={styles.globalButton} onClick={() => navigate('Shop', { view: 'pets' })}>Buy Pets</button>
       </div>
@@ -132,7 +127,6 @@ const styles = {
     padding: '8px 12px',
     fontSize: 14,
   },
-  // --- debugSection and debugButton styles removed ---
   globalActions: {
     marginTop: 'auto', // Pushes this section to the bottom
     paddingTop: 20,
@@ -152,3 +146,4 @@ const styles = {
     margin: '10px 0',
   },
 };
+
