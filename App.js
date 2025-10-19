@@ -306,7 +306,7 @@ export default function App() {
             style={styles.homeFooterButton}
             onPress={() => navigate('Lessons')}
           >
-            <Text style={styles.homeButtonText}>Video Lessons</Text>
+            <Text style={styles.homeButtonText}>Learn</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.homeFooterButton}

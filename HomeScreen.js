@@ -11,6 +11,9 @@ export default function HomeScreen({ navigate }) {
     selectedPetId, 
     setSelectedPetId, 
     addPet,
+    globalGold,      // <-- Add this
+    updateGlobalGold,
+    updatePet
   } = usePets();
 
   const currentIndex = pets.findIndex(p => p.id === selectedPetId);
@@ -43,6 +46,10 @@ export default function HomeScreen({ navigate }) {
   }
 
   const { id, name, level, hp, maxHp, attack, xp, xpToNextLevel } = selectedPet;
+  
+  // Calculate percentages, ensuring no division by zero
+  const hpPercent = maxHp > 0 ? (hp / maxHp) * 100 : 0;
+  const xpPercent = xpToNextLevel > 0 ? (xp / xpToNextLevel) * 100 : 0;
 
   return (
     <View style={styles.container}>
@@ -62,10 +69,50 @@ export default function HomeScreen({ navigate }) {
               resizeMode="contain"
             />
           </View>
-          <Text style={styles.petStatText}>Level: {level} ({xp}/{xpToNextLevel} XP)</Text>
-          <Text style={styles.petStatText}>HP: {hp}/{maxHp}</Text>
           <Text style={styles.petStatText}>Attack: {attack}</Text>
           
+          {/* --- HP Bar --- */}
+          <View style={styles.barContainer}>
+            <View style={styles.barBackground}>
+              <View style={[styles.hpBar, { width: `${hpPercent}%` }]} />
+            </View>
+            <Text style={styles.barText}>HP: {hp}/{maxHp}</Text>
+          </View>
+
+          {/* --- XP Bar --- */}
+          <View style={styles.barContainer}>
+            <View style={styles.barBackground}>
+              <View style={[styles.xpBar, { width: `${xpPercent}%` }]} />
+            </View>
+            <Text style={styles.barText}>Lvl {level} ({xp}/{xpToNextLevel} XP)</Text>
+          </View>          
+          <TouchableOpacity 
+            style={styles.actionButton} 
+            onPress={() => {
+              console.log("Feed button pressed."); // Log 1
+              if (!selectedPet) {
+                  console.log("No pet selected, exiting."); // Log 2
+                  alert("No pet selected!");
+                  return;
+              }
+              console.log(`Pet HP: ${selectedPet.hp}, Max HP: ${selectedPet.maxHp}`); // Log 3
+              if(selectedPet.hp >= selectedPet.maxHp) {
+                console.log("HP is full, exiting."); // Log 4
+                alert("HP is already full!");
+                return;
+              }
+              console.log(`Global Gold: ${globalGold}`); // Log 5
+              if (globalGold < 5) {
+                console.log("Not enough gold, exiting."); // Log 6
+                alert("Not enough gold to feed!");
+                return;
+              }
+              console.log("Updating gold and HP..."); // Log 7
+              updateGlobalGold(g => g - 5);
+              updatePet(selectedPetId, (p) => ({ hp: Math.min(p.maxHp, p.hp + 2) }));
+            }}>
+            <Text style={styles.buttonText}>Feed</Text>
+          </TouchableOpacity>
           <View style={styles.petActions}>
             <TouchableOpacity style={styles.actionButton} onPress={() => navigate('Battle')}>
                 <Text style={styles.buttonText}>Battle</Text>
@@ -80,9 +127,6 @@ export default function HomeScreen({ navigate }) {
             <Text style={styles.arrowButtonText}>{'>'}</Text>
         </TouchableOpacity>
       </View>
-
-      {/* --- Global Action Buttons (REMOVED) --- */}
-      {/* This section is now handled by the footer in App.js */}
     </View>
   );
 }
@@ -95,8 +139,8 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'flex-start', // Changed from 'space-between'
-    paddingTop: 20, // Add some top padding
+    justifyContent: 'center', // Changed from 'space-between'
+    paddingTop: -50, // Add some top padding
   },
   petBrowser: {
     display: 'flex',
@@ -135,7 +179,9 @@ const styles = StyleSheet.create({
   },
   petStatText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 18,
+    fontWeight: '500',
+    marginTop: 8, // Added margin for spacing
   },
   petActions: {
     display: 'flex',
@@ -147,6 +193,7 @@ const styles = StyleSheet.create({
   actionButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
+    marginTop: 12,
     fontSize: 14,
     backgroundColor: '#007bff',
     borderRadius: 5,
@@ -162,5 +209,42 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginVertical: 10,
+  },
+  // --- NEW STYLES FOR BARS ---
+  barContainer: {
+    width: '90%',
+    marginTop: 8,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  barBackground: {
+    width: '100%',
+    height: 20,
+    backgroundColor: '#333',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#555',
+    overflow: 'hidden', // Ensures inner bar stays rounded
+  },
+  hpBar: {
+    height: '100%',
+    backgroundColor: '#28a745', // Green for HP
+    borderRadius: 10,
+  },
+  xpBar: {
+    height: '100%',
+    backgroundColor: '#8a2be2', // Purple for XP
+    borderRadius: 10,
+  },
+  barText: {
+    position: 'absolute',
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+    // Add a slight shadow to make text readable on any color
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
 });

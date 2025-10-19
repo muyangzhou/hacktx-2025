@@ -107,22 +107,6 @@ const BankScreen = ({ navigate, bankView, setBankView }) => {
             <Text style={styles.buttonText}>Upload Receipt for Gold</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Savings Account</Text>
-        <Text style={styles.paragraph}>Current Gold: {globalGold}</Text>
-         <TextInput
-            style={styles.input}
-            placeholder="Enter amount to deposit"
-            placeholderTextColor="#999"
-            keyboardType="numeric"
-            value={savings}
-            onChangeText={setSavings}
-        />
-        <TouchableOpacity style={styles.button} onPress={handleAddSavings}>
-            <Text style={styles.buttonText}>Add Savings & Get Reward</Text>
-        </TouchableOpacity>
-      </View>
-      
     </>
   );
 
@@ -222,6 +206,7 @@ const styles = StyleSheet.create({
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'center',
         width: '100%',
         flex: 1, 
     },
