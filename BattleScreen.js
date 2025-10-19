@@ -40,7 +40,7 @@ export default function BattleScreen({ navigate }) {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={styles.battleContainer}>
       <h3>Battle</h3>
       <p>{selectedPet.name} HP: {selectedPet.hp}/{selectedPet.maxHp} (Lvl {selectedPet.level})</p>
       <Image
@@ -57,3 +57,13 @@ export default function BattleScreen({ navigate }) {
     </div>
   );
 }
+
+const styles = {
+  battleContainer: { 
+    padding: 20,
+    backgroundColor: '#a2a2a2',
+    // alignItems: 'center',
+    // display: 'flex',
+    // flexDirection: 'column',
+  },
+};

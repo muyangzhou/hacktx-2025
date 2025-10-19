@@ -101,9 +101,9 @@ export default function ShopScreen({ navigate, params }) {
   const renderPetShop = () => {
     return (
       <>
-        <h4 style={{marginTop: 10, marginBottom: 5}}>Buy New Pets</h4>
+        <h4 style={styles.petShop}>Buy New Pets</h4>
         {buyablePets.map(pet => (
-          <div key={pet.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 8, borderBottom: '1px solid #eee' }}>
+          <div key={pet.id} style={styles.petCard}>
             <div>{pet.name} (Lvl {pet.level}, HP {pet.hp}) — ${pet.price}</div>
             <Image
               source={petImages[pet.id]}
@@ -118,7 +118,7 @@ export default function ShopScreen({ navigate, params }) {
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={styles.shopContainer}>
       <h3>Shop</h3>
       <p>Player Gold: {globalGold}</p>
       
@@ -128,3 +128,22 @@ export default function ShopScreen({ navigate, params }) {
     </div>
   );
 }
+const styles = {
+  petCard: {
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    padding: 8, 
+    backgroundColor: '#a2a2a2',
+    border: '1px solid #eee',
+  },
+  petShop: {
+    marginTop: 10, 
+    marginBottom: 5,
+    backgroundColor: '#a2a2a2'
+  },
+  shopContainer: {
+    padding: 20,
+    backgroundColor: '#a2a2a2',
+    borderRadius: 10,
+  },
+};
